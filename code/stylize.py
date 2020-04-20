@@ -3,10 +3,12 @@ import code.loss as loss
 import code.hyperparameters as hp
 from sklearn.metrics import mean_squared_error
 from code.nn import VGGModel
+import tensorflow as tp
 
 class Stylize:
 
-    def __init__(self, content_image, style_image):
+    def __init__(self, content_image, style_image, vgg_model,
+    alpha=hp.content_weight, beta=hp.style_weight, gamme=hp.temporal_weight):
         """ Class for generating a stylized image using style transfer.
 
         Arguments:
@@ -29,16 +31,18 @@ class Stylize:
         self.content_features = np.zeros()
         # gram matrices of feature maps extracted from style image by style layers in VGG
         self.style_features_grams = np.zeros()
-        # fill in the above to feature map response matrices
-        self.fill_feature_maps(self)
         # feature maps extracted from stylized (generated) image by both
         # content and style layers (calculated at each iteration)
         self.stylized_content_features = np.zeros()
-        self.stylized_style_features = np.zeros()
+        self.stylized_style_features_grams = np.zeros()
+        # loss related
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
 
 
 
-    def fill_feature_maps(self):
+    def fill_target_feature_maps(self):
         # go through content layers of network calculating response at each layer
         content_responses = []
         for layer in self.content_layers:
@@ -54,13 +58,39 @@ class Stylize:
             # get feature response
             response = self.model.__call__(layer, self.style_image)
             # calculate gram matrix
-            
-
+            gram = (response.T @ response)
             style_responses.append(response)
         # set field in object
         self.style_features = np.array(style_responses)
 
 
+    def extract_features_from_stylized(self):
+
+
+
+    def stylize(self):
+        # fill in feature maps for content and style targets
+        self.fill_target_feature_maps(self)
+
+        
+
+        
+        return self.stylized
+    
+
+
+    def calculate_content_loss(self):
+        return mean_squared_error(self.content_features, self.stylized_content_features)
+
+
+    def calculate_style_loss(self):
+        return mean_squared_error(self.style_features_grams, self.stylized_style_features_grams)
+
+    
+    def calculate_loss(self):
+        weighted_content_loss = self.alpha * calculate_content_loss(self)
+        weighted_style_loss = self.beta * calculate_style_loss(self)
+        return weighted_content_loss + weighted_style_loss
 
         
 
