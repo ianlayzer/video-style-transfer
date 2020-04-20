@@ -9,6 +9,7 @@ from preprocess import Datasets
 from tensorboard_utils import ImageLabelingLogger, ConfusionMatrixLogger
 from keras.applications import vgg19
 from PIL import Image
+from stylize import Stylize
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -39,8 +40,9 @@ def main():
     style_input = Image.open(style_path)
     model = vgg19.VGG19(input_tensor = image_input, weights = 'imagenet', include_top = False)
     stylize = Stylize(image_input, style_input, model)
+    stylize.stylize()
     outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
-
+    
 
 def call(dictionary, layer_name):
     return dictionary.get(layer_name)
