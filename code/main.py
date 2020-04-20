@@ -7,6 +7,8 @@ from your_model import YourModel
 import hyperparameters as hp
 from preprocess import Datasets
 from tensorboard_utils import ImageLabelingLogger, ConfusionMatrixLogger
+from keras.applications import vgg19
+from PIL import Image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -25,30 +27,29 @@ def parse_args():
     parser.add_argument(
         '--style',
         help='style file.')
-    parser.add_argument(
-        '--confusion',
-        action='store_true',
-        help='''Log a confusion matrix at the end of each
-        epoch (viewable in Tensorboard). This is turned off
-        by default as it takes a little bit of time to complete.''')
-    parser.add_argument(
-        '--evaluate',
-        action='store_true',
-        help='''Skips training and evaluates on the test set once.
-        You can use this to test an already trained model by loading
-        its checkpoint.''')
 
     return parser.parse_args()
 
 
 
-def main(args):
+def main():
     video_path = data_folder + ARGS.video
     style_path = data_folder + ARGS.style
+    image_input = Image.open(video_path)
+    style_input = Image.open(style_path)
+    model = vgg19.VGG19(input_tensor = image_input, weights = 'imagenet', include_top = False)
+    stylize = Stylize(image_input, style_input, model)
+    outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
 
+
+def call(dictionary, layer_name):
+    return dictionary.get(layer_name)
+    
 
 
 #global arguments
-ARGS = parse_args():
+ARGS = parse_args()
 
+
+#run main
 main()
