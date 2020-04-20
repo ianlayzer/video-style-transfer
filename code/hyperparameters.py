@@ -5,3 +5,6 @@ temporal_weight = 200 # temporal loss weight constant
 
 # learning rate for gradient descent
 learning_rate = 1e-4
+
+# number of iterations for gradient descent
+num_iterations = 2000

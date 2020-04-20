@@ -1,14 +1,14 @@
 import numpy as np
-import code.loss as loss
-import code.hyperparameters as hp
+import hyperparameters as hp
 from sklearn.metrics import mean_squared_error
-from code.nn import VGGModel
-import tensorflow as tp
+from nn import VGGModel
+import tensorflow as tf
 
 class Stylize:
 
     def __init__(self, content_image, style_image, vgg_model,
-    alpha=hp.content_weight, beta=hp.style_weight, gamme=hp.temporal_weight):
+    content_weight=hp.content_weight, style_weight=hp.style_weight,
+    learning_rate=hp.learning_rate, num_iterations=hp.num_iterations):
         """ Class for generating a stylized image using style transfer.
 
         Arguments:
@@ -36,13 +36,15 @@ class Stylize:
         self.stylized_content_features = np.zeros()
         self.stylized_style_features_grams = np.zeros()
         # loss related
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
+        self.content_weight = content_weight
+        self.style_weight = style_weight
+        # learning hyperparameters
+        self.learning_rate = learning_rate
+        self.num_iterations = num_iterations
 
 
 
-    def fill_target_feature_maps(self):
+    def precompute_content_features(self):
         # go through content layers of network calculating response at each layer
         content_responses = []
         for layer in self.content_layers:
@@ -52,6 +54,7 @@ class Stylize:
         # set field in object
         self.content_features = np.array(content_responses)
 
+    def precopute_style_features(self):
         # go through style layers of network calculating response at each layer 
         style_responses = []
         for layer in self.style_layers:
@@ -64,86 +67,45 @@ class Stylize:
         self.style_features = np.array(style_responses)
 
 
-    def extract_features_from_stylized(self):
-
+    def compute_stylized_features(self):
+        return 0
 
 
     def stylize(self):
-        # fill in feature maps for content and style targets
-        self.fill_target_feature_maps(self)
-
+        # precompute feature maps for content and style targets (only done once)
+        self.precompute_content_features(self)
+        self.precopute_style_features(self)
         
+        
+        self.compute_stylized_features(self)
+        
+        weighted_content_loss = 0
+        weighted_style_loss = 0
+        
+        
+        stylized = tf.Variables(self.stylized)
+
+        # calculate content loss
+        content_loss = tf.losses.mean_squared_error(self.content_features, self.stylized_content_features)
+        content_loss = tf.multiply(self.content_weight, content_loss)
+        # calculate style loss
+        style_loss = tf.mean_squared_error()
+        style_loss = tf.multiply(self.style_weight, style_loss)
+        loss = tf.add(content_loss, style_loss)
+        
+        # use gradient descent optimizer
+        optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
+        train = optimizer.minimize(loss)
+
+        for i in range(0, self.num_iterations):
+
+
+            print("Iteration " + str(i))
+
+
 
         
         return self.stylized
     
 
 
-    def calculate_content_loss(self):
-        return mean_squared_error(self.content_features, self.stylized_content_features)
-
-
-    def calculate_style_loss(self):
-        return mean_squared_error(self.style_features_grams, self.stylized_style_features_grams)
-
-    
-    def calculate_loss(self):
-        weighted_content_loss = self.alpha * calculate_content_loss(self)
-        weighted_style_loss = self.beta * calculate_style_loss(self)
-        return weighted_content_loss + weighted_style_loss
-
-        
-
-
-
-    # def stylize(self):
-    #     # counter for iterations
-    #     iteration = 0 
-    #     # loss of previous epoch
-    #     prev_loss = float('inf')
-    #     # converged set to True once convergence condition satisfied
-    #     converged = False 
-        
-    #     # perform gradient descent until loss has converged
-    #     while not converged:
-            
-    #         # calculate loss between generated image 'stylized' and source images
-    #         loss = loss.loss_total(content_image, style_image, stylized)
-    #         # use backpropagation to calculate gradient of stylized image to minimize loss
-    #         delta_stylized = loss.backprop(content_image, style_image, stylized)
-    #         # adjust stylized image using gradient
-    #         stylized = stylized + hp.learning_rate * delta_stylized
-            
-    #         # check if has converged
-    #         converged = abs(loss - prev_loss) < 0.01 * loss
-
-    #         print("Iteration " + str(iteration) + ": loss: " + str(loss))
-    #         prev_loss = loss
-    #         iteration += 1
-
-
-
-    #     return stylized
-
-
-# Scratchwork below... We need to get the response to the convolution layers
-# for both content features and style. Content loss is the meansquared error
-# between the feature map response of the content image and that of the stylized
-# image
-
-content_features = (im_height, im_weight, )
-for layer in content_layers:
-    content_features = np.zeros(10)
-    stylized_features = np.zeros(10)
-    # mean squared error between target features and stylized features
-    content_loss += mean_squared_error(content_features, stylized_features)
-
-
-style_loss = 0
-
-style_style_features = np.empty(())
-
-stylized_style_features =
-
-for layer in style_layers:
-    # something to do with correlation and Gram matrices
