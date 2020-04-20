@@ -1,6 +1,7 @@
 from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
+from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten, Dense
 from keras.optimizers import SGD
 import cv2, numpy as np
 
@@ -13,61 +14,55 @@ class VGGModel(tf.keras.Model):
             learning_rate=hp.learning_rate,
             momentum=hp.momentum)
 
-def VGG_19(weights_path=None):
-    model = Sequential()
-    model.add(ZeroPadding2D((1,1),input_shape=(3,224,224)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
 
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+        self.vgg19 = [
 
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+        Conv2D(64, 3, 3, activation='relu'),
+        Conv2D(64, 3, 3, activation='relu'),
+        MaxPool2D((2,2), strides=(2,2)),
 
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+        Conv2D(128, 3, 3, activation='relu'),
+        Conv2D(128, 3, 3, activation='relu'),
+        MaxPool2D((2,2), strides=(2,2)),
 
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
+        Conv2D(256, 3, 3, activation='relu'),
+        Conv2D(256, 3, 3, activation='relu'),
+        Conv2D(256, 3, 3, activation='relu'),
+        Conv2D(256, 3, 3, activation='relu'),
+        MaxPool2D((2,2), strides=(2,2)),
 
-    model.add(Flatten())
-    model.add(Dense(4096, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(4096, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(1000, activation='softmax'))
+        Conv2D(512, 3, 3, activation='relu'),
+        Conv2D(512, 3, 3, activation='relu'),
+        Conv2D(512, 3, 3, activation='relu'),
+        Conv2D(512, 3, 3, activation='relu'),
+        MaxPool2D((2,2), strides=(2,2)),
 
-    if weights_path:
-        model.load_weights(weights_path)
+        Conv2D(512, 3, 3, activation='relu'),
+        Conv2D(512, 3, 3, activation='relu'),
+        Conv2D(512, 3, 3, activation='relu'),
+        Conv2D(512, 3, 3, activation='relu'),
+        MaxPool2D((2,2), strides=(2,2)),
 
-    return model
+        Flatten(),
+        Dense(4096, activation='relu'),
+        Dropout(0.5),
+        Dense(4096, activation='relu'),
+        Dropout(0.5),
+        Dense(10, activation='softmax'),
+        ]
+        
+        for l in self.vgg19:
+            l.trainable = False
+
+    """ Passes the image through the network. """
+   def call(self, img):
+        for layer in self.vgg19:
+            img = layer(img)
+        return img
+
+
+
+
 
 if __name__ == "__main__":
     im = cv2.resize(cv2.imread('cat.jpg'), (224, 224)).astype(np.float32)
