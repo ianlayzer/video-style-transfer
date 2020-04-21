@@ -41,6 +41,7 @@ def main():
     model = vgg19.VGG19(input_tensor = image_input, weights = 'imagenet', include_top = False)
     stylize = Stylize(image_input, style_input, model)
     stylize.stylize()
+    #this is to get certain layers of the model
     outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
     
 
