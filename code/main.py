@@ -8,6 +8,7 @@ import hyperparameters as hp
 from preprocess import Datasets
 from tensorboard_utils import ImageLabelingLogger, ConfusionMatrixLogger
 from keras.applications import vgg19
+from keras import Model
 from PIL import Image
 from stylize import Stylize
 
@@ -38,7 +39,9 @@ def main():
     style_path = data_folder + ARGS.style
     image_input = Image.open(video_path)
     style_input = Image.open(style_path)
-    model = vgg19.VGG19(input_tensor = image_input, weights = 'imagenet', include_top = False)
+    w = 500
+    h = 500
+    model = vgg19.VGG19(input_tensor = image_input, weights = 'imagenet', include_top = False, input_shape=(h, w, 3))
     stylize = Stylize(image_input, style_input, model)
     stylize.stylize()
     #this is to get certain layers of the model

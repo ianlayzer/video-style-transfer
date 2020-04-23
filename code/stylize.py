@@ -1,7 +1,6 @@
 import numpy as np
 import hyperparameters as hp
 from sklearn.metrics import mean_squared_error
-from nn import VGGModel
 import tensorflow as tf
 
 class Stylize:
@@ -21,9 +20,9 @@ class Stylize:
         self.style_image = style_image
         # stylized image initialized as whitenoise
         self.stylized = np.random.normal(content_image.shape)
-
+    
         # Layers of VGG-19 network to use for content and style feature response respectively
-        self.model = VGGModel()
+        self.model = vgg_model
         self.content_layers = ['relu4_2']
         self.style_layers = ['relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1']
 
@@ -43,13 +42,21 @@ class Stylize:
         self.num_iterations = num_iterations
 
 
+    def call(self, layer_name, input):
+        layer = self.model.get_layer(layer_name)
+        if layer == None:
+            print("layer doesn't exist")
+        else:
+            layer(input)
+    
+
 
     def precompute_content_features(self):
         # go through content layers of network calculating response at each layer
         content_responses = []
         for layer in self.content_layers:
             # get feature response by calling specific layer o nimage
-            response = self.model.__call__(layer, self.content_image)
+            response = call(layer, self.content_image)
             content_responses.append(response)
         # set field in object
         self.content_features = np.array(content_responses)
@@ -59,7 +66,7 @@ class Stylize:
         style_responses = []
         for layer in self.style_layers:
             # get feature response
-            response = self.model.__call__(layer, self.style_image)
+            response = call(layer, self.style_image)
             # calculate gram matrix
             gram = (response.T @ response)
             style_responses.append(response)
@@ -73,11 +80,9 @@ class Stylize:
 
     def stylize(self):
         # precompute feature maps for content and style targets (only done once)
-        self.precompute_content_features(self)
-        self.precopute_style_features(self)
-        
-        
-        self.compute_stylized_features(self)
+        self.precompute_content_features()
+        self.precopute_style_features()
+        self.compute_stylized_features()
         
         weighted_content_loss = 0
         weighted_style_loss = 0
