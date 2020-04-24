@@ -108,7 +108,11 @@ for l in range(14):
   content_model.add(curr_layer)
 
 def get_content_loss():
-  return np.square(np.subtract(np.array(content_model(input_content_img), dtype=np.float32), np.array(content_model(output_stylized_img), dtype=np.float32))).mean()
+  a = np.subtract(np.array(content_model(input_content_img), dtype=np.float32), np.array(content_model(output_stylized_img), dtype=np.float32))
+  b = np.square(a)
+  c = np.mean(b)
+  return c
+  # np.square(np.subtract(np.array(content_model(input_content_img), dtype=np.float32), np.array(content_model(output_stylized_img), dtype=np.float32))).mean()
 
 ### STYLE LOSS ###
 
