@@ -198,7 +198,8 @@ num_epochs = 100
 for e in range(num_epochs):
   print("yeet")
   with tf.GradientTape() as tape:
-    loss = get_total_loss()
+    loss = tf.convert_to_tensor(get_total_loss(), dtype=tf.float64)
+
   output_stylized_img = tf.convert_to_tensor(output_stylized_img, dtype=tf.float64)
   grad = tape.gradient(loss, output_stylized_img)
   optimizer.apply_gradients([(grad, output_stylized_img)])
