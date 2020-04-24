@@ -93,6 +93,7 @@ class Stylize:
         style_loss = tf.multiply(self.style_weight, style_loss)
         loss = tf.add(content_loss, style_loss)
         
+        
         # use gradient descent optimizer
         optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
         train = optimizer.minimize(loss)
