@@ -108,7 +108,7 @@ for l in range(14):
   content_model.add(curr_layer)
 
 def get_content_loss():
-  return np.square(np.subtract(content_model(input_content_img), content_model(output_stylized_img))).mean()
+  return np.square(np.subtract(np.array(content_model(input_content_img), dytpe=np.float32), np.array(content_model(output_stylized_img), dtype=np.float32))).mean()
 
 ### STYLE LOSS ###
 
@@ -153,32 +153,32 @@ for l in range(18):
 
 def get_style_loss():
   # Style 1 Loss # 
-  gram_1_in_style = np.dot(np.transpose(np.squeeze(style_model_1(input_style_img))), np.squeeze(style_model_1(input_style_img)))
-  gram_1_out_stylized = np.dot(np.transpose(np.squeeze(style_model_1(output_stylized_img))), np.squeeze(style_model_1(output_stylized_img)))
+  gram_1_in_style = np.dot(np.transpose(np.squeeze(np.array(style_model_1(input_style_img), dtype=np.float32))), np.squeeze(np.array(style_model_1(input_style_img), dtype=np.float32)))
+  gram_1_out_stylized = np.dot(np.transpose(np.squeeze(np.array(style_model_1(output_stylized_img), dtype=np.float32))), np.squeeze(np.array(style_model_1(output_stylized_img), dtype=np.float32)))
 
   style_1_loss = np.square(np.subtract(gram_1_in_style, gram_1_out_stylized)).mean()
 
   # Style 2 Loss # 
-  gram_2_in_style = np.dot(np.transpose(np.squeeze(style_model_2(input_style_img))), np.squeeze(style_model_2(input_style_img)))
-  gram_2_out_stylized = np.dot(np.transpose(np.squeeze(style_model_2(output_stylized_img))), np.squeeze(style_model_2(output_stylized_img)))
+  gram_2_in_style = np.dot(np.transpose(np.squeeze(np.array(style_model_2(input_style_img), dtype=np.float32))), np.squeeze(np.array(style_model_2(input_style_img), dtype=np.float32)))
+  gram_2_out_stylized = np.dot(np.transpose(np.squeeze(np.array(style_model_2(output_stylized_img), dtype=np.float32))), np.squeeze(np.array(style_model_2(output_stylized_img), dtype=np.float32)))
 
   style_2_loss = np.square(np.subtract(gram_2_in_style, gram_2_out_stylized)).mean()
 
   # Style 3 Loss # 
-  gram_3_in_style = np.dot(np.transpose(np.squeeze(style_model_3(input_style_img))), np.squeeze(style_model_3(input_style_img)))
-  gram_3_out_stylized = np.dot(np.transpose(np.squeeze(style_model_3(output_stylized_img))), np.squeeze(style_model_3(output_stylized_img)))
+  gram_3_in_style = np.dot(np.transpose(np.squeeze(np.array(style_model_3(input_style_img), dtype=np.float32))), np.squeeze(np.array(style_model_3(input_style_img), dtype=np.float32)))
+  gram_3_out_stylized = np.dot(np.transpose(np.squeeze(np.array(style_model_3(output_stylized_img), dtype=np.float32))), np.squeeze(np.array(style_model_3(output_stylized_img), dtype=np.float32)))
 
   style_3_loss = np.square(np.subtract(gram_3_in_style, gram_3_out_stylized)).mean()
 
   # Style 4 Loss # 
-  gram_4_in_style = np.dot(np.transpose(np.squeeze(style_model_4(input_style_img))), np.squeeze(style_model_4(input_style_img)))
-  gram_4_out_stylized = np.dot(np.transpose(np.squeeze(style_model_4(output_stylized_img))), np.squeeze(style_model_4(output_stylized_img)))
+  gram_4_in_style = np.dot(np.transpose(np.squeeze(np.array(style_model_4(input_style_img), dtype=np.float32))), np.squeeze(np.array(style_model_4(input_style_img), dtype=np.float32)))
+  gram_4_out_stylized = np.dot(np.transpose(np.squeeze(np.array(style_model_4(output_stylized_img), dtype=np.float32))), np.squeeze(np.array(style_model_4(output_stylized_img), dtype=np.float32)))
 
   style_4_loss = np.square(np.subtract(gram_4_in_style, gram_4_out_stylized)).mean()
 
   # Style 5 Loss # 
-  gram_5_in_style = np.dot(np.transpose(np.squeeze(style_model_5(input_style_img))), np.squeeze(style_model_5(input_style_img)))
-  gram_5_out_stylized = np.dot(np.transpose(np.squeeze(style_model_5(output_stylized_img))), np.squeeze(style_model_5(output_stylized_img)))
+  gram_5_in_style = np.dot(np.transpose(np.squeeze(np.array(style_model_5(input_style_img), dtype=np.float32))), np.squeeze(np.array(style_model_5(input_style_img), dtype=np.float32)))
+  gram_5_out_stylized = np.dot(np.transpose(np.squeeze(np.array(style_model_5(output_stylized_img), dtype=np.float32))), np.squeeze(np.array(style_model_5(output_stylized_img), dtype=np.float32)))
 
   style_5_loss = np.square(np.subtract(gram_5_in_style, gram_5_out_stylized)).mean()
   total_style_loss = style_1_loss + style_2_loss + style_3_loss + style_4_loss + style_5_loss 
