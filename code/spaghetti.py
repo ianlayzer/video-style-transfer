@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.python.keras.utils import data_utils
 import matplotlib.pyplot as plt
-import PIL.Image
 
 # (larger dimensions produces clearer final images but takes longer to run)
 img_height = 224
@@ -193,6 +192,5 @@ tf.keras.preprocessing.image.save_img('output.jpg', output_image)
 # [ ] try using copy of content image as inital output image instead of random noise
 # [~] change learning rate in optimizer
 # [ ] try other optimizer (project code uses RMSprop with learning rate = 1e-4)
-# [X] rewrite code to feed through layers with for loops instead of creating separate models
-# [X] try adjusting image input dimensions
-# [X] try using other methods for computing gram matrices (eigensums)
+# [X] adjusting image input dimensions
+# [X] use other methods for computing gram matrices (eigensums)
