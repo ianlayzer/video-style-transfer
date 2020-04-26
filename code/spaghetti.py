@@ -151,7 +151,7 @@ def get_style_loss():
 #       They might be different due to the different optimizer?
 def get_total_loss():
   content_loss_weight = 10000
-  style_loss_weight = 0.03
+  style_loss_weight = 0.03 # increasing to 0.05 also worked well
   content_loss = get_content_loss()
   style_loss = get_style_loss()
 
