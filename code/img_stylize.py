@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.python.keras.utils import data_utils
-import matplotlib.pyplot as plt
 from model import make_vgg
 import hyperparameters as hp
 
@@ -155,8 +154,3 @@ def get_total_loss(input_style_img, output_stylized_img, input_content_img):
 # [ ] try other optimizer (project code uses RMSprop with learning rate = 1e-4)
 # [X] adjusting image input dimensions
 # [X] use other methods for computing gram matrices (eigensums)
-
-content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
-
-stylize_image(content_path, style_path)

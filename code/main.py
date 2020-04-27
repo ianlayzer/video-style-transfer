@@ -2,13 +2,7 @@
 import os
 import argparse
 import tensorflow as tf
-from your_model import YourModel
 import hyperparameters as hp
-from preprocess import Datasets
-from tensorboard_utils import ImageLabelingLogger, ConfusionMatrixLogger
-from keras.applications import vgg19
-from keras import Model
-from PIL import Image
 from img_stylize import stylize_image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -23,12 +17,12 @@ def parse_args():
     parser.add_argument(
         '--video',
         required=False,
-        type=str,
+        action="store_true",
         help='''are you loading in a video?''')
     parser.add_argument(
         '--image',
         required=False,
-        type=str,
+        action="store_true",
         help='''are you loading in an image?''')
     parser.add_argument(
         '--content',
@@ -38,14 +32,17 @@ def parse_args():
     parser.add_argument(
         '--style',
         required=True,
+        type=str,
         help='style file.')
     parser.add_argument(
         '--both',
         required=False,
+        action="store_true",
         help='both short and long term consistency.')   
     parser.add_argument(
         '--short',
         required=False,
+        action="store_true",
         help='enforce short term consistency.')                     
 
     return parser.parse_args()

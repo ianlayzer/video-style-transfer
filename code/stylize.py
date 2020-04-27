@@ -1,11 +1,8 @@
 import tensorflow as tf
-from tensorflow.keras import layers
-from tensorflow.python.keras.utils import data_utils
-import matplotlib.pyplot as plt
 from model import make_vgg
 import hyperparameters as hp
 
-# refactored functions to work  with both images and video
+# refactored functions to work with both images and video
 image_height = hp.img_height
 image_width = hp.img_width
 
@@ -126,11 +123,3 @@ stylize_img(content, style, stylized)
 # Uncomment this if running in Colab:
 # from google.colab import files
 # files.download('output.jpg')
-
-# TODO:
-# [~] fine tune stye loss weight
-# [ ] try using copy of content image as inital output image instead of random noise
-# [~] change learning rate in optimizer
-# [ ] try other optimizer (project code uses RMSprop with learning rate = 1e-4)
-# [X] adjusting image input dimensions
-# [X] use other methods for computing gram matrices (eigensums)
