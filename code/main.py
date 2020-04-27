@@ -9,7 +9,7 @@ from tensorboard_utils import ImageLabelingLogger, ConfusionMatrixLogger
 from keras.applications import vgg19
 from keras import Model
 from PIL import Image
-from stylize import Stylize
+from img_stylize import stylize_image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -24,37 +24,44 @@ def parse_args():
         '--video',
         required=False,
         type=str,
-        help='''the video to load in''')
+        help='''are you loading in a video?''')
     parser.add_argument(
         '--image',
         required=False,
         type=str,
-        help='''the video to load in''')
+        help='''are you loading in an image?''')
     parser.add_argument(
         '--content',
         required=True,
         type=str,
-        help='''the video to load in''')   
+        help='''the content file''')   
     parser.add_argument(
         '--style',
+        required=True
         help='style file.')
+    parser.add_argument(
+        '--both',
+        required=False
+        help='both short and long term consistency.')   
+    parser.add_argument(
+        '--short',
+        required=False
+        help='enforce short term consistency.')                     
 
     return parser.parse_args()
 
 
 
 def main():
+    #get image paths
     content_path = data_folder + ARGS.content
     style_path = data_folder + ARGS.style
-    image_input = Image.open(content_path)
-    style_input = Image.open(style_path)
-    w = 500
-    h = 500
-    model = vgg19.VGG19(input_tensor = image_input, weights = 'imagenet', include_top = False, input_shape=(h, w, 3))
-    stylize = Stylize(image_input, style_input, model)
-    stylize.stylize()
-    #this is to get certain layers of the model
-    outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
+    #calling img_stylize or vid_stylize to stylize the content
+    if ARGS.image:
+        stylize_image(image_input, style_input)
+    
+        
+    
     
 
 

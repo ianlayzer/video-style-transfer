@@ -3,26 +3,62 @@ from tensorflow.keras import layers
 from tensorflow.python.keras.utils import data_utils
 import matplotlib.pyplot as plt
 from model import make_vgg
+import hyperparameters as hp
 
 # (larger dimensions produces clearer final images but takes longer to run)
-img_height = 224
-img_width = 224
 
+image_height = hp.image_height
+image_width = hp.image_width
+
+def stylize_image(content_file, style_file)
 ### VGG 19, max pooling layers replaced with average pooling, input layer changed for variable sizes ###
-model = make_vgg(img_height, img_width)
-model.summary()
+  model = make_vgg(img_height, img_width)
+  model.summary()
+  for layer in model.layers: # necessary?
+    layer.trainable = False
 
-for layer in model.layers: # necessary?
-  layer.trainable = False
-
-##############################
-
-# URL to content image (easy to replace with reading from file later)
-content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+  ##############################
+  content_path = content_file
+  style_path = style_file
+  # URL to content image (easy to replace with reading from file later)
+  #content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
     # content_path = tf.keras.utils.get_file('MonaLisa.jpg', 'https://i.ibb.co/Mk3SjBT/monalisa.jpg')
-# URL to style image
+  # URL to style image
     # style_path = tf.keras.utils.get_file('Kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
-style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
+  #style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
+  # three images
+  input_content_img = preprocess_image(content_path)
+  input_style_img = preprocess_image(style_path)
+  output_stylized_img = initialize_stylized()
+
+  ### CONTENT LOSS ###
+  # Maximum VGG layers for content and style models
+  # max layers = [content, style1, style2, style3, style4, style5]
+  max_layers = [14, 2, 5, 8, 13, 18]
+  # The original paper used L-BFGS as their optimizer, but it's not available in tensorflow
+  # Used Adam instead, tuned learning rate (feel free to adjust it and compare results--0.03/0.04 worked well)
+  optimizer = tf.optimizers.Adam(learning_rate=hp.learning_rate)
+
+  # Optimizes images to minimize loss between input content image/input style image and output stylized image
+  num_epochs = hp.epoch_num
+  for e in range(num_epochs):
+    # Prints epoch number every 100 epochs
+    if e % 100 == 0:
+      print("Epoch " + str(e))
+    # Watches loss computation (output_stylized_img watched by default since declared as variable)
+    with tf.GradientTape() as tape:
+      loss = get_total_loss()
+    # Computes gradient between the loss and the output stylized image
+    grad = tape.gradient(loss, output_stylized_img)
+    # Applies this gradient to the image
+    optimizer.apply_gradients([(grad, output_stylized_img)]) 
+    # Clips image from 0-1, assigns gradient applied image to image variable
+    output_stylized_img.assign(tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0))
+
+
+# Removes batch axis, converts image from BGR back to RGB, saves stylized image as "output.jpg" in same directory
+  output_image = tf.reverse(tf.squeeze(output_stylized_img), axis=[-1]).numpy()
+  tf.keras.preprocessing.image.save_img('output.jpg', output_image)
 
 
 # Reads in and decodes images
@@ -49,16 +85,8 @@ def initialize_stylized():
   output_stylized_img = tf.Variable(output_stylized_img)
   return output_stylized_img
 
-# three images
-input_content_img = preprocess_image(content_path)
-input_style_img = preprocess_image(style_path)
-output_stylized_img = initialize_stylized()
 
-### CONTENT LOSS ###
 
-# Maximum VGG layers for content and style models
-# max layers = [content, style1, style2, style3, style4, style5]
-max_layers = [14, 2, 5, 8, 13, 18]
 
 # Feeds image through portion of VGG (depending on content or style model)
 # Returns feature map for that image
@@ -106,38 +134,15 @@ def get_style_loss():
 # (Weights are different than the paper, but after lots of trial and error these seem to work well)
 #       They might be different due to the different optimizer?
 def get_total_loss():
-  content_loss_weight = 10000
-  style_loss_weight = 0.03 # increasing to 0.05 also worked well
+  content_loss_weight = hp.content_loss_weight
+  style_loss_weight = hp.style_loss_weight # increasing to 0.05 also worked well
   content_loss = get_content_loss()
   style_loss = get_style_loss()
 
   total_loss = content_loss_weight*content_loss + style_loss_weight*style_loss
   return total_loss
 
-# The original paper used L-BFGS as their optimizer, but it's not available in tensorflow
-# Used Adam instead, tuned learning rate (feel free to adjust it and compare results--0.03/0.04 worked well)
-optimizer = tf.optimizers.Adam(learning_rate=0.04)
 
-# Optimizes images to minimize loss between input content image/input style image and output stylized image
-num_epochs = 1000
-for e in range(num_epochs):
-  # Prints epoch number every 100 epochs
-  if e % 100 == 0:
-    print("Epoch " + str(e))
-  # Watches loss computation (output_stylized_img watched by default since declared as variable)
-  with tf.GradientTape() as tape:
-    loss = get_total_loss()
-  # Computes gradient between the loss and the output stylized image
-  grad = tape.gradient(loss, output_stylized_img)
-  # Applies this gradient to the image
-  optimizer.apply_gradients([(grad, output_stylized_img)]) 
-  # Clips image from 0-1, assigns gradient applied image to image variable
-  output_stylized_img.assign(tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0))
-
-
-# Removes batch axis, converts image from BGR back to RGB, saves stylized image as "output.jpg" in same directory
-output_image = tf.reverse(tf.squeeze(output_stylized_img), axis=[-1]).numpy()
-tf.keras.preprocessing.image.save_img('output.jpg', output_image)
 
 # Uncomment this if running in Colab:
 # from google.colab import files
