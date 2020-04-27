@@ -3,12 +3,14 @@ import os
 from moviepy.editor import *
 
 # Before running this file, first run "pip install moviepy"
+# (This file/the file this function is placed in needs to be run from the code directory to work)
 
 # these can be read in as inputs from main
 video_name = "tomjerry"
 framespersec = 1
 
 def video_to_images(video_name, framespersec):
+    # Converts the video to the desired fps, saves a new copy of the video
     old_fps = VideoFileClip("./../data/content/video/" + video_name + ".mp4")
     new_path = "./../data/content/video/" + video_name + "_" + str(framespersec) + "fps" + ".mp4"
     old_fps.write_videofile(new_path, fps=framespersec)
