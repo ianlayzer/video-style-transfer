@@ -1,7 +1,4 @@
 import tensorflow as tf
-from tensorflow.keras import layers
-from tensorflow.python.keras.utils import data_utils
-import matplotlib.pyplot as plt
 from model import make_vgg
 import hyperparameters as hp
 
