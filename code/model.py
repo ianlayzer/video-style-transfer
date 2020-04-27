@@ -41,6 +41,12 @@ def make_vgg(img_height, img_width):
     weights_no_top = ('https://storage.googleapis.com/tensorflow/keras-applications/vgg19/vgg19_weights_tf_dim_ordering_tf_kernels_notop.h5')
     weights_path = data_utils.get_file('vgg19_weights_tf_dim_ordering_tf_kernels_notop.h5', weights_no_top)
     model.load_weights(weights_path)
+    
+    # we won't train model
+    for layer in model.layers:
+        layer.trainable = False
+    model.summary()
+    
     return model
 
     

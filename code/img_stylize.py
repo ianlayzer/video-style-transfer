@@ -160,4 +160,3 @@ content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleap
 style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 
 stylize_image(content_path, style_path)
-
