@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.python.keras.utils import data_utils
-import matplotlib.pyplot as plt
 from model import make_vgg
 import hyperparameters as hp
 
@@ -17,7 +16,6 @@ def stylize_image(content_file, style_file):
   model.summary()
   for layer in model.layers: # necessary?
     layer.trainable = False
-
   ##############################
   content_path = content_file
   style_path = style_file

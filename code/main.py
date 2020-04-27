@@ -2,13 +2,7 @@
 import os
 import argparse
 import tensorflow as tf
-from your_model import YourModel
 import hyperparameters as hp
-from preprocess import Datasets
-from tensorboard_utils import ImageLabelingLogger, ConfusionMatrixLogger
-from keras.applications import vgg19
-from keras import Model
-from PIL import Image
 from img_stylize import stylize_image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
