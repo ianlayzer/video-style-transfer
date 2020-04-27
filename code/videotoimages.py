@@ -8,7 +8,7 @@ from moviepy.editor import *
 video_name = "tomjerry"
 framespersec = 1
 
-def video_to_images(video_name, framespersec)
+def video_to_images(video_name, framespersec):
     old_fps = VideoFileClip("./../data/content/video/" + video_name + ".mp4")
     new_path = "./../data/content/video/" + video_name + "_" + str(framespersec) + "fps" + ".mp4"
     old_fps.write_videofile(new_path, fps=framespersec)
