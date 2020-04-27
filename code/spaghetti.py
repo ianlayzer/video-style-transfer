@@ -74,7 +74,7 @@ def preprocess_images(content_path, style_path):
   # Input content image
   input_content_img = tf.io.read_file(content_path)
   input_content_img = tf.image.decode_image(input_content_img, channels=3, dtype=tf.float32)
-  input_content_img = tf.image.resize(input_content_img, (img_height, img_width)) # add antialiasing argument
+  input_content_img = tf.image.resize(input_content_img, (img_height, img_width), , antialias=True)
   input_content_img = tf.image.convert_image_dtype(input_content_img, tf.uint8)
   input_content_img = tf.expand_dims(input_content_img, 0)
   input_content_img = tf.keras.applications.imagenet_utils.preprocess_input(input_content_img)
@@ -83,7 +83,7 @@ def preprocess_images(content_path, style_path):
   # Input style image
   input_style_img = tf.io.read_file(style_path)
   input_style_img = tf.image.decode_image(input_style_img, channels=3, dtype=tf.float32)
-  input_style_img = tf.image.resize(input_style_img, (img_height, img_width)) # add antialiasing argument
+  input_style_img = tf.image.resize(input_style_img, (img_height, img_width), , antialias=True)
   input_style_img = tf.image.convert_image_dtype(input_style_img, tf.uint8)
   input_style_img = tf.expand_dims(input_style_img, 0)
   input_style_img = tf.keras.applications.imagenet_utils.preprocess_input(input_style_img)
