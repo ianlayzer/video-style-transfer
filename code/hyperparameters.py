@@ -13,3 +13,6 @@ epoch_num = 1000
 
 content_loss_weight = 10000
 style_loss_weight = 0.03
+
+img_height = 224
+img_width = 224

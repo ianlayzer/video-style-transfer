@@ -7,12 +7,13 @@ import hyperparameters as hp
 
 # (larger dimensions produces clearer final images but takes longer to run)
 
-image_height = hp.image_height
-image_width = hp.image_width
-
-def stylize_image(content_file, style_file)
+image_height = hp.img_height
+image_width = hp.img_width
+max_layers = [14, 2, 5, 8, 13, 18]
+model = make_vgg(image_height, image_width)
+  
+def stylize_image(content_file, style_file):
 ### VGG 19, max pooling layers replaced with average pooling, input layer changed for variable sizes ###
-  model = make_vgg(img_height, img_width)
   model.summary()
   for layer in model.layers: # necessary?
     layer.trainable = False
@@ -34,11 +35,10 @@ def stylize_image(content_file, style_file)
   ### CONTENT LOSS ###
   # Maximum VGG layers for content and style models
   # max layers = [content, style1, style2, style3, style4, style5]
-  max_layers = [14, 2, 5, 8, 13, 18]
+  
   # The original paper used L-BFGS as their optimizer, but it's not available in tensorflow
   # Used Adam instead, tuned learning rate (feel free to adjust it and compare results--0.03/0.04 worked well)
   optimizer = tf.optimizers.Adam(learning_rate=hp.learning_rate)
-
   # Optimizes images to minimize loss between input content image/input style image and output stylized image
   num_epochs = hp.epoch_num
   for e in range(num_epochs):
@@ -47,7 +47,7 @@ def stylize_image(content_file, style_file)
       print("Epoch " + str(e))
     # Watches loss computation (output_stylized_img watched by default since declared as variable)
     with tf.GradientTape() as tape:
-      loss = get_total_loss()
+      loss = get_total_loss(input_style_img, output_stylized_img, input_content_img)
     # Computes gradient between the loss and the output stylized image
     grad = tape.gradient(loss, output_stylized_img)
     # Applies this gradient to the image
@@ -69,9 +69,9 @@ def stylize_image(content_file, style_file)
 # Converts images from RGB to BGR, standardizes them based on mean and stdd of imagenet
 # Converts images back to float so that gradients can be applied during optimization
 def preprocess_image(image_path):
-  image = tf.io.read_file(content_path)
+  image = tf.io.read_file(image_path)
   image = tf.image.decode_image(image, channels=3, dtype=tf.float32)
-  image = tf.image.resize(image, (img_height, img_width), antialias=True)
+  image = tf.image.resize(image, (image_height, image_width), antialias=True)
   image = tf.image.convert_image_dtype(image, tf.uint8)
   image = tf.expand_dims(image, 0)
   image = tf.keras.applications.imagenet_utils.preprocess_input(image)
@@ -80,7 +80,7 @@ def preprocess_image(image_path):
 
 def initialize_stylized():
   # Output stylized image
-  output_stylized_img = tf.random.normal((1, img_height, img_width, 3), mean=0.5)
+  output_stylized_img = tf.random.normal((1, image_height, image_width, 3), mean=0.5)
   output_stylized_img = tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0)
   output_stylized_img = tf.Variable(output_stylized_img)
   return output_stylized_img
@@ -100,8 +100,8 @@ def get_feature_map(img, max_layers_index):
   return img_copy
 
 # Computes content loss as MSE between the feature maps of the input content image and the output stylized image
-def get_content_loss():
-  return tf.keras.losses.MeanSquaredError()(get_feature_map(input_content_img, 0), get_feature_map(output_stylized_img, 0))
+def get_content_loss(input_content, output_stylized):
+  return tf.keras.losses.MeanSquaredError()(get_feature_map(input_content, 0), get_feature_map(output_stylized, 0))
 
 ### STYLE LOSS ###
 
@@ -115,11 +115,11 @@ def compute_feature_map_gram(feature_map, depth):
 # Computes the Gram matrix for each image's resulting feature map
 # Computes loss as MSE between Gram matrices of the images' feture maps
 # Sums these losses for each style model to get total style loss
-def get_style_loss():
+def get_style_loss(style_input_img, style_output_img):
   total_style_loss = tf.constant(0.0)
   for i in range(1, 6):
-    feature_map_in = get_feature_map(input_style_img, i)
-    feature_map_out = get_feature_map(output_stylized_img, i)
+    feature_map_in = get_feature_map(style_input_img, i)
+    feature_map_out = get_feature_map(style_output_img, i)
 
     depth = feature_map_in.shape[3]
     gram_in_style = compute_feature_map_gram(feature_map_in, depth)
@@ -133,11 +133,11 @@ def get_style_loss():
 # Gets content loss, style loss, then multiplies them by corresponding weights to get total loss
 # (Weights are different than the paper, but after lots of trial and error these seem to work well)
 #       They might be different due to the different optimizer?
-def get_total_loss():
+def get_total_loss(input_style_img, output_stylized_img, input_content_img):
   content_loss_weight = hp.content_loss_weight
   style_loss_weight = hp.style_loss_weight # increasing to 0.05 also worked well
-  content_loss = get_content_loss()
-  style_loss = get_style_loss()
+  content_loss = get_content_loss(input_content_img, output_stylized_img)
+  style_loss = get_style_loss(input_style_img, output_stylized_img)
 
   total_loss = content_loss_weight*content_loss + style_loss_weight*style_loss
   return total_loss
