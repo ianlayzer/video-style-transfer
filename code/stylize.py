@@ -44,8 +44,6 @@ def stylize_img(content, style, stylized, use_temporal_loss=False, previous_styl
 	# Optimizes images to minimize loss between input content image/input style image and output stylized image
 	num_epochs = hp.epoch_num
 	for e in range(num_epochs):
-		print("Epoch " + str(e))
-
 		# Watches loss computation (output_stylized_img watched by default since declared as variable)
 		with tf.GradientTape() as tape:
 			# compute stylized features response to content and style layers
@@ -53,16 +51,18 @@ def stylize_img(content, style, stylized, use_temporal_loss=False, previous_styl
 			stylized_style_feature_grams = features_to_grams(compute_all_feature_maps(stylized, style_layers))
 			# calculate loss
 			loss = get_total_loss(content_feature_maps, style_feature_grams, stylized_content_features, stylized_style_feature_grams)
-			# calculate gradient of loss with respect to the stylized image (a variable)
-			grad = tape.gradient(loss, stylized)
-			# Applies this gradient to the image
-			optimizer.apply_gradients([(grad, stylized)])
-			# Clips image from 0-1, assigns gradient applied image to image variable
-			stylized.assign(tf.clip_by_value(stylized, clip_value_min=0.0, clip_value_max=1.0))
+		if e % 10 == 0:
+			print("Epoch " + str(e) + " Loss: " + str(loss))
+		# calculate gradient of loss with respect to the stylized image (a variable)
+		grad = tape.gradient(loss, stylized)
+		# Applies this gradient to the image
+		optimizer.apply_gradients([(grad, stylized)])
+		# Clips image from 0-1, assigns gradient applied image to image variable
+		stylized.assign(tf.clip_by_value(stylized, clip_value_min=0.0, clip_value_max=1.0))
 
 	# Removes batch axis, converts image from BGR back to RGB, saves stylized image as "output.jpg" in same directory
 	output_image = tf.reverse(tf.squeeze(stylized), axis=[-1]).numpy()
-	tf.keras.preprocessing.image.save_img('../data/output/output.jpg', output_image)
+	tf.keras.preprocessing.image.save_img('output.jpg', output_image)
 
 # computes list of feature map responses by passing image through network
 # up until each layer in layers
