@@ -2,7 +2,6 @@
 import os
 import argparse
 import tensorflow as tf
-from vgg_model import VGGModel
 from your_model import YourModel
 import hyperparameters as hp
 from preprocess import Datasets
@@ -23,9 +22,19 @@ def parse_args():
         description="Style transfer!")
     parser.add_argument(
         '--video',
-        required=True,
+        required=False,
         type=str,
         help='''the video to load in''')
+    parser.add_argument(
+        '--image',
+        required=False,
+        type=str,
+        help='''the video to load in''')
+    parser.add_argument(
+        '--content',
+        required=True,
+        type=str,
+        help='''the video to load in''')   
     parser.add_argument(
         '--style',
         help='style file.')
@@ -35,9 +44,9 @@ def parse_args():
 
 
 def main():
-    video_path = data_folder + ARGS.video
+    content_path = data_folder + ARGS.content
     style_path = data_folder + ARGS.style
-    image_input = Image.open(video_path)
+    image_input = Image.open(content_path)
     style_input = Image.open(style_path)
     w = 500
     h = 500
@@ -48,11 +57,8 @@ def main():
     outputs_dict = dict([(layer.name, layer.output) for layer in model.layers])
     
 
-def call(dictionary, layer_name):
-    return dictionary.get(layer_name)
-    
 
-
+#image vs. video, style, content, temporal loss (none, short, both)
 #global arguments
 ARGS = parse_args()
 
