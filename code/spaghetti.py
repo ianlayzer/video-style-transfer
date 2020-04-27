@@ -174,18 +174,18 @@ for e in range(num_epochs):
   # Computes gradient between the loss and the output stylized image
   grad = tape.gradient(loss, output_stylized_img)
   # Applies this gradient to the image
-  optimizer.apply_gradients([(grad, output_stylized_img)])
+  optimizer.apply_gradients([(grad, output_stylized_img)]) 
   # Clips image from 0-1, assigns gradient applied image to image variable
   output_stylized_img.assign(tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0))
 
 
-# Removes batch axis, converts image from BGR back to RGB
-    # If running in Colab (will take a very long time):
-# plt.imshow(tf.reverse(tf.squeeze(output_stylized_img), axis=[-1]).numpy())
-
-    # If running in GCP (saves stylized image as "output.jpg" in same directory):
+# Removes batch axis, converts image from BGR back to RGB, saves stylized image as "output.jpg" in same directory
 output_image = tf.reverse(tf.squeeze(output_stylized_img), axis=[-1]).numpy()
 tf.keras.preprocessing.image.save_img('output.jpg', output_image)
+
+# Uncomment this if running in Colab:
+# from google.colab import files
+# files.download('output.jpg')
 
 # TODO:
 # [~] fine tune stye loss weight
