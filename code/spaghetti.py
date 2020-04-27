@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.python.keras.utils import data_utils
 import matplotlib.pyplot as plt
-import PIL.Image
 
 # (larger dimensions produces clearer final images but takes longer to run)
 img_height = 224
@@ -75,7 +74,7 @@ def preprocess_images(content_path, style_path):
   # Input content image
   input_content_img = tf.io.read_file(content_path)
   input_content_img = tf.image.decode_image(input_content_img, channels=3, dtype=tf.float32)
-  input_content_img = tf.image.resize(input_content_img, (img_height, img_width)) # add antialiasing argument
+  input_content_img = tf.image.resize(input_content_img, (img_height, img_width), antialias=True)
   input_content_img = tf.image.convert_image_dtype(input_content_img, tf.uint8)
   input_content_img = tf.expand_dims(input_content_img, 0)
   input_content_img = tf.keras.applications.imagenet_utils.preprocess_input(input_content_img)
@@ -84,7 +83,7 @@ def preprocess_images(content_path, style_path):
   # Input style image
   input_style_img = tf.io.read_file(style_path)
   input_style_img = tf.image.decode_image(input_style_img, channels=3, dtype=tf.float32)
-  input_style_img = tf.image.resize(input_style_img, (img_height, img_width)) # add antialiasing argument
+  input_style_img = tf.image.resize(input_style_img, (img_height, img_width), antialias=True)
   input_style_img = tf.image.convert_image_dtype(input_style_img, tf.uint8)
   input_style_img = tf.expand_dims(input_style_img, 0)
   input_style_img = tf.keras.applications.imagenet_utils.preprocess_input(input_style_img)
@@ -152,7 +151,7 @@ def get_style_loss():
 #       They might be different due to the different optimizer?
 def get_total_loss():
   content_loss_weight = 10000
-  style_loss_weight = 0.03
+  style_loss_weight = 0.03 # increasing to 0.05 also worked well
   content_loss = get_content_loss()
   style_loss = get_style_loss()
 
@@ -180,19 +179,18 @@ for e in range(num_epochs):
   output_stylized_img.assign(tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0))
 
 
-# Removes batch axis, converts image from BGR back to RGB
-    # If running in Colab (will take a very long time):
-# plt.imshow(tf.reverse(tf.squeeze(output_stylized_img), axis=[-1]).numpy())
-
-    # If running in GCP (saves stylized image as "output.jpg" in same directory):
+# Removes batch axis, converts image from BGR back to RGB, saves stylized image as "output.jpg" in same directory
 output_image = tf.reverse(tf.squeeze(output_stylized_img), axis=[-1]).numpy()
 tf.keras.preprocessing.image.save_img('output.jpg', output_image)
+
+# Uncomment this if running in Colab:
+# from google.colab import files
+# files.download('output.jpg')
 
 # TODO:
 # [~] fine tune stye loss weight
 # [ ] try using copy of content image as inital output image instead of random noise
 # [~] change learning rate in optimizer
 # [ ] try other optimizer (project code uses RMSprop with learning rate = 1e-4)
-# [X] rewrite code to feed through layers with for loops instead of creating separate models
-# [X] try adjusting image input dimensions
-# [X] try using other methods for computing gram matrices (eigensums)
+# [X] adjusting image input dimensions
+# [X] use other methods for computing gram matrices (eigensums)
