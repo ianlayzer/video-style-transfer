@@ -37,19 +37,18 @@ def parse_args():
         help='''the content file''')   
     parser.add_argument(
         '--style',
-        required=True
+        required=True,
         help='style file.')
     parser.add_argument(
         '--both',
-        required=False
+        required=False,
         help='both short and long term consistency.')   
     parser.add_argument(
         '--short',
-        required=False
+        required=False,
         help='enforce short term consistency.')                     
 
     return parser.parse_args()
-
 
 
 def main():
@@ -58,7 +57,7 @@ def main():
     style_path = data_folder + ARGS.style
     #calling img_stylize or vid_stylize to stylize the content
     if ARGS.image:
-        stylize_image(image_input, style_input)
+        stylize_image(content_path, style_path)
     
         
     
