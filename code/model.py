@@ -45,7 +45,7 @@ def make_vgg(img_height, img_width):
     # we won't train model
     for layer in model.layers:
         layer.trainable = False
-    model.summary()
+    # model.summary()
     
     return model
 

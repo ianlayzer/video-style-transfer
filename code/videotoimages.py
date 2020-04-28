@@ -7,7 +7,7 @@ from moviepy.editor import *
 
 # these can be read in as inputs from main
 video_name = "tomjerry"
-framespersec = 1
+framespersec = 24
 
 def video_to_images(video_name, framespersec):
     # Converts the video to the desired fps, saves a new copy of the video
