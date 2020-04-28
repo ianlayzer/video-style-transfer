@@ -28,7 +28,7 @@ def initialize_stylized():
 	output_stylized_img = tf.Variable(output_stylized_img)
 	return output_stylized_img
 
-def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None, use_temporal_loss=False):
+def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None, use_temporal_loss=False, frames=None):
 	"""Generates a stylized still image frame using the content from content, the
 	style from style. The stylized image is initialized as the inputted stylized image.
 	We can also pass in stylized feature maps rather than a stylized image, in which
@@ -49,6 +49,7 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 					feature map gram matrices to this function for every frame
 		- use_temporal_loss: whether or not to include temporal loss in the total
 					loss calculation
+		- frames: a list [prev_frame, curr_frame, next_frame]
 	"""
 	# the previous stylized frame
 	previous_stylized = tf.identity(initial_stylized)
@@ -56,7 +57,7 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 	# TODO: temporal weights mask
 	weights_mask = []
 	if use_temporal_loss:
-		weights_mask = compute_temporal_weights()
+		weights_mask = compute_temporal_weights(frames[0], frames[1], frames[2])
 
 
 	stylized = initial_stylized
