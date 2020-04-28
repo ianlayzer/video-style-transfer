@@ -1,6 +1,7 @@
 import tensorflow as tf
 from model import make_vgg
 import hyperparameters as hp
+import cv2
 
 # refactored functions to work with both images and video
 image_height = hp.img_height
@@ -57,7 +58,7 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 	# TODO: temporal weights mask
 	weights_mask = []
 	if use_temporal_loss:
-		weights_mask = compute_temporal_weights(frames[0], frames[1], frames[2])
+		weights_mask = compute_disocclusion_mask(frames[0], frames[1], frames[2])
 
 
 	stylized = initial_stylized
@@ -151,7 +152,7 @@ def layered_mean_squared_error(source_features, generated_features):
 
 # TEMPORAL STUFF
 
-def compute_temporal_weights(prev_frame, curr_frame, next_frame):
+def compute_disocclusion_mask(prev_frame, curr_frame, next_frame):
 	# TODO: implement weights matrix where value is 0 if pixel is disoccluded and
 	# 1 otherwise?
 
@@ -164,13 +165,41 @@ def get_temporal_loss(previous_stylized, current_stylized, weights_mask):
 
 	return 0
 
+def get_flow_vectors(frame_1, frame_2):
+
+	#TODO: implement Gunner Farneback algorithm using OpenCV
+
+	print(frame_1.numpy().shape)
+
+	frame_1 = frame_1.numpy()
+	frame_2 = frame_2.numpy()
+
+    frame_1 = np.reshape(frame_1, (frame_1.shape[1], frame_1.shape[2], frame_1.shape[3]))
+    frame_2 = np.reshape(frame_2, (frame_2.shape[1], frame_2.shape[2], frame_2.shape[3]))
+
+    frame_1 = cv2.cvtColor(frame_1,cv2.COLOR_BGR2GRAY)
+    frame_2 = cv2.cvtColor(frame_2,cv2.COLOR_BGR2GRAY)
+
+
+    #Calculate Flow
+    flow = cv2.calcOpticalFlowFarneback(frame_1,frame_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+    return flow
+
 
 def apply_optical_flow(frame, next_frame, stylized_frame):
 
 	# TODO: apply optical flow from frame to next frame onto stylized frame
+
+	flow = get_flow_vectors(frame, next_frame)
+
+	h, w = flow.shape[:2]
+    flow = -flow
+    flow[:,:,0] += np.arange(w)
+    flow[:,:,1] += np.arange(h)[:,np.newaxis]
+    res = cv2.remap(img, flow, None, cv2.INTER_LINEAR)
+
 	return
-
-
 
 
 def stylize_image(content_path, style_path):
