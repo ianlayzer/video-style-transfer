@@ -10,7 +10,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 # import matplotlib.pyplot as plt
 
 # !! Before running this file, first run "pip install moviepy" !!
-# (This file/the file this function is placed in needs to be run from the code directory to work)
+# (Note: you have to cd-ed into the code directory for this function to work)
 
 def video_to_images(video_name, fps):
 	video = VideoFileClip("./../data/content/video/" + video_name)
