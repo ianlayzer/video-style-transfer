@@ -167,39 +167,41 @@ def get_temporal_loss(previous_stylized, current_stylized, weights_mask):
 
 def get_flow_vectors(frame_1, frame_2):
 
-	#TODO: implement Gunner Farneback algorithm using OpenCV
+	# #TODO: implement Gunner Farneback algorithm using OpenCV
 
-	print(frame_1.numpy().shape)
+	# print(frame_1.numpy().shape)
 
-	frame_1 = frame_1.numpy()
-	frame_2 = frame_2.numpy()
+	# frame_1 = frame_1.numpy()
+	# frame_2 = frame_2.numpy()
 
-    frame_1 = np.reshape(frame_1, (frame_1.shape[1], frame_1.shape[2], frame_1.shape[3]))
-    frame_2 = np.reshape(frame_2, (frame_2.shape[1], frame_2.shape[2], frame_2.shape[3]))
+    # frame_1 = np.reshape(frame_1, (frame_1.shape[1], frame_1.shape[2], frame_1.shape[3]))
+    # frame_2 = np.reshape(frame_2, (frame_2.shape[1], frame_2.shape[2], frame_2.shape[3]))
 
-    frame_1 = cv2.cvtColor(frame_1,cv2.COLOR_BGR2GRAY)
-    frame_2 = cv2.cvtColor(frame_2,cv2.COLOR_BGR2GRAY)
+    # frame_1 = cv2.cvtColor(frame_1,cv2.COLOR_BGR2GRAY)
+    # frame_2 = cv2.cvtColor(frame_2,cv2.COLOR_BGR2GRAY)
 
 
-    #Calculate Flow
-    flow = cv2.calcOpticalFlowFarneback(frame_1,frame_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+    # #Calculate Flow
+    # flow = cv2.calcOpticalFlowFarneback(frame_1,frame_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
 
-    return flow
+    # return flow
+	return None
 
 
 def apply_optical_flow(frame, next_frame, stylized_frame):
 
-	# TODO: apply optical flow from frame to next frame onto stylized frame
+	# # TODO: apply optical flow from frame to next frame onto stylized frame
 
-	flow = get_flow_vectors(frame, next_frame)
+	# flow = get_flow_vectors(frame, next_frame)
 
-	h, w = flow.shape[:2]
-    flow = -flow
-    flow[:,:,0] += np.arange(w)
-    flow[:,:,1] += np.arange(h)[:,np.newaxis]
-    res = cv2.remap(img, flow, None, cv2.INTER_LINEAR)
+	# h, w = flow.shape[:2]
+    # flow = -flow
+    # flow[:,:,0] += np.arange(w)
+    # flow[:,:,1] += np.arange(h)[:,np.newaxis]
+    # res = cv2.remap(img, flow, None, cv2.INTER_LINEAR)
 
-	return
+	# return
+	return None
 
 
 def stylize_image(content_path, style_path):
