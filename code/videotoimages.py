@@ -49,6 +49,8 @@ def video_to_images(video_name, fps):
 		num_frames += 1
 		next_image = tf.convert_to_tensor(frame, dtype=tf.uint8)
 		next_image = tf.image.convert_image_dtype(next_image, tf.float32)
+		# here we're ready for resizing in preprocess
+
 		next_image = tf.image.resize(next_image, (image_height, image_width), antialias=True)
 		next_image = next_image.numpy()
 
