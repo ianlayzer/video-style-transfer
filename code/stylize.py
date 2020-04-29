@@ -4,6 +4,8 @@ import hyperparameters as hp
 import cv2
 import matplotlib.pyplot as plt
 from moviepy.editor import *
+from cv2 import VideoWriter, VideoWriter_fourcc
+import numpy as np
 
 # refactored functions to work with both images and video
 image_height = hp.img_height
@@ -264,10 +266,36 @@ def stylize_video(video_path, style_path, fps):
 		plt.show()
 
 
-video_path = "tomjerry.mp4"
-style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
+# video_path = "tomjerry.mp4"
+# style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 
-stylize_video(video_path, style_path, 1)
+# stylize_video(video_path, style_path, 1)
+
+
+# writes a list of numpy array frames to a video
+def write_video(frames, fps, filename):
+	fourcc = VideoWriter_fourcc(*'mp4v')
+	video = VideoWriter(filename, fourcc, fps, (image_width, image_height))
+
+	for frame in frames:
+		video.write(frame)
+	
+	video.release()
+
+# width = 1280
+# height = 720
+# FPS = 24
+# seconds = 3
+
+# fourcc = VideoWriter_fourcc(*'mp4v')
+# video = VideoWriter('./noise.mp4', fourcc, float(FPS), (width, height))
+
+# for _ in range(FPS*seconds):
+#     frame = np.random.randint(0, 256, 
+#                               (height, width, 3), 
+#                               dtype=np.uint8)
+#     video.write(frame)
+# video.release()
 
 # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 # style_path = 
