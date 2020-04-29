@@ -29,24 +29,31 @@ def video_to_images(video_name, fps):
 	for frame in frames_iterable:
 		frame_list.append(frame)
 
-	print(len(frame_list))
+	# print(len(frame_list))
 
 	new_list = []
 	for i in range(40):
 		new_list.append(frame_list[5*i])
+
+	curr_image = new_list[0]
+	curr_image = tf.convert_to_tensor(frame, dtype=tf.uint8)
+	curr_image = tf.image.convert_image_dtype(curr_image, tf.float32)
+	curr_image = tf.image.resize(curr_image, (image_height, image_width), antialias=True)
+	curr_image = curr_image.numpy()
+	prev_image = curr_image
 
 	for frame in new_list:
 		# if num_frames > 1:
 		# 	break
 
 		num_frames += 1
-		image = tf.convert_to_tensor(frame, dtype=tf.uint8)
-		image = tf.image.convert_image_dtype(image, tf.float32)
-		image = tf.image.resize(image, (image_height, image_width), antialias=True)
-		image = image.numpy()
+		next_image = tf.convert_to_tensor(frame, dtype=tf.uint8)
+		next_image = tf.image.convert_image_dtype(next_image, tf.float32)
+		next_image = tf.image.resize(next_image, (image_height, image_width), antialias=True)
+		next_image = next_image.numpy()
 
-		if num_frames > 1:
-			flow = get_flow_vectors(prev_image, image)
+		if num_frames > 2:
+			flow = get_flow_vectors(prev_image, curr_image)
 
 			h, w = flow.shape[:2]
 			fx, fy = flow[:,:,0], flow[:,:,1]
@@ -58,18 +65,23 @@ def video_to_images(video_name, fps):
 			hsv[...,2] = cv2.normalize(v, None, 0, 255, cv2.NORM_MINMAX)
 			rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
-			im2w = apply_optical_flow(prev_image, image, prev_image)
+			im2w = apply_optical_flow(flow, prev_image)
+			mask = compute_disocclusion_mask(prev_image, curr_image, next_image)
+			# print(np.average(mask))
+			# print(mask[0])
 
 			cv2.imshow("flow",rgb)
 			cv2.imshow("1", prev_image)
-			cv2.imshow("2", image)
-			cv2.imshow("remapped", (im2w))
+			cv2.imshow("2", curr_image)
+			cv2.imshow("bool", (np.where(mask, 1, 0)).astype(np.float32))
+			# cv2.imshow("remapped", (im2w))
 
 			cv2.waitKey(6000)
 
 			cv2.destroyAllWindows()
 
-		prev_image = image
+		prev_image = curr_image
+		curr_image = next_image
 
 		# Image is now ready for line 3 of preprocess_image in stylize (resizing)
 		
@@ -84,17 +96,38 @@ def compute_disocclusion_mask(prev_frame, curr_frame, next_frame):
 	# TODO: implement weights matrix where value is 0 if pixel is disoccluded and
 	# 1 otherwise?
 
-	w = get_flow_vectors(prev_frame, curr_frame)
-	w_hat = get_flow_vectors(next_frame, curr_frame)
+	forward_flow = get_flow_vectors(prev_frame, curr_frame)
+	backward_flow = get_flow_vectors(next_frame, curr_frame)
 
-	return curr_frame
+	# forward_warp = apply_optical_flow(forward_flow, prev_frame)
+	# backward_warp = apply_optical_flow(backward_flow, next_frame)
+
+	cancel_flow = forward_flow+backward_flow
+
+	LHS = cancel_flow[:,:,0]**2 + cancel_flow[:,:,1]**2
+
+	w_squigly_2 = forward_flow[:,:,0]**2 + forward_flow[:,:,1]**2
+	w_hat_2 = backward_flow[:,:,0]**2 + backward_flow[:,:,1]**2
+
+	RHS = .001 * (w_hat_2 + w_squigly_2) +.5
+
+	mask = LHS <= RHS
+
+	return mask
 
 
-def get_temporal_loss(previous_stylized, current_stylized, weights_mask):
+def get_temporal_loss(previous_stylized, previous_content, current_content, current_stylized, weights_mask):
 	
 	# TODO: implement temporal loss between 
 
-	return 0
+	flow = get_flow_vectors(previous_content, current_content)
+
+	warped_style_curr = apply_optical_flow(flow, previous_stylized)
+
+	loss = np.where(weights_mask, (current_stylized-warped_style_curr)**2, 0)
+	#?????
+
+	return np.average(loss)
 
 def get_flow_vectors(frame_1, frame_2):
 
@@ -117,11 +150,9 @@ def get_flow_vectors(frame_1, frame_2):
 	return flow
 
 
-def apply_optical_flow(frame, next_frame, stylized_frame):
+def apply_optical_flow(flow, frame):
 
 	# TODO: apply optical flow from frame to next frame onto stylized frame
-
-	flow = get_flow_vectors(frame, next_frame)
 
 	h, w = flow.shape[:2]
 	flow = -flow
