@@ -20,13 +20,29 @@ def video_to_images(video_name, fps):
 	# If we want an array of all of the images, we could use this loop to get each image
 	#    and then add them one by one into an array (although this might not be necessary)
 	num_frames = 0
+
+	image_height = 300
+	image_width = 600
+
+	frame_list = []
+
 	for frame in frames_iterable:
+		frame_list.append(frame)
+
+	print(len(frame_list))
+
+	new_list = []
+	for i in range(40):
+		new_list.append(frame_list[5*i])
+
+	for frame in new_list:
 		# if num_frames > 1:
 		# 	break
 
 		num_frames += 1
 		image = tf.convert_to_tensor(frame, dtype=tf.uint8)
 		image = tf.image.convert_image_dtype(image, tf.float32)
+		image = tf.image.resize(image, (image_height, image_width), antialias=True)
 		image = image.numpy()
 
 		if num_frames > 1:
@@ -49,7 +65,7 @@ def video_to_images(video_name, fps):
 			cv2.imshow("2", image)
 			cv2.imshow("remapped", (im2w))
 
-			cv2.waitKey(15000)
+			cv2.waitKey(6000)
 
 			cv2.destroyAllWindows()
 
@@ -84,11 +100,17 @@ def get_flow_vectors(frame_1, frame_2):
 
 	#TODO: implement Gunner Farneback algorithm using OpenCV
 
+	# print(frame_1.max())
+
 	frame_1 = cv2.cvtColor(frame_1,cv2.COLOR_RGB2GRAY)
 	frame_2 = cv2.cvtColor(frame_2,cv2.COLOR_RGB2GRAY)
 
+	# print(frame_1.max())
+
 	#Calculate Flow
-	flow = cv2.calcOpticalFlowFarneback(frame_1,frame_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+	# flow = cv2.calcOpticalFlowFarneback(frame_1,frame_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+	flow = cv2.calcOpticalFlowFarneback(frame_1*255,frame_2*255, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
 
 	#frame_1,frame_2, None, 0.5, 3, 15, 3, 5, 1.2, 0
 
@@ -103,13 +125,12 @@ def apply_optical_flow(frame, next_frame, stylized_frame):
 
 	h, w = flow.shape[:2]
 	flow = -flow
-	flow = (flow*1000000).astype(np.float32)
 	# print(flow[:,:,0])
 	# print(flow.dtype)
 	flow[:,:,0] += np.arange(w)
 	flow[:,:,1] += np.arange(h)[:,np.newaxis]
 
-	res = cv2.remap(frame, flow[:,:,0], flow[:,:,1], cv2.INTER_LINEAR)
+	res = cv2.remap(frame, flow, None, cv2.INTER_LINEAR)
 
 	return res
 
@@ -133,8 +154,8 @@ def apply_optical_flow(frame, next_frame, stylized_frame):
 
 
 # These can be read in as inputs from main
-video_name = "tomjerry.mp4"
-fps = 1
+video_name = "elephant.mp4"
+fps = 29
 
 video_to_images(video_name, fps)
 
