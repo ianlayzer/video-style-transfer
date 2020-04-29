@@ -33,7 +33,7 @@ def video_to_images(video_name, fps):
 
 	new_list = []
 	for i in range(40):
-		new_list.append(frame_list[5*i])
+		new_list.append(frame_list[i])
 
 	curr_image = new_list[0]
 	curr_image = tf.convert_to_tensor(frame, dtype=tf.uint8)
@@ -73,8 +73,8 @@ def video_to_images(video_name, fps):
 			cv2.imshow("flow",rgb)
 			cv2.imshow("1", prev_image)
 			cv2.imshow("2", curr_image)
-			cv2.imshow("bool", (np.where(mask, 1, 0)).astype(np.float32))
-			# cv2.imshow("remapped", (im2w))
+			# cv2.imshow("bool", (np.where(mask, 1, 0)).astype(np.float32))
+			cv2.imshow("remapped", (im2w))
 
 			cv2.waitKey(6000)
 
@@ -124,6 +124,7 @@ def get_temporal_loss(previous_stylized, previous_content, current_content, curr
 
 	warped_style_curr = apply_optical_flow(flow, previous_stylized)
 
+	#MAKE TF!!!
 	loss = np.where(weights_mask, (current_stylized-warped_style_curr)**2, 0)
 	#?????
 
