@@ -263,8 +263,9 @@ def stylize_video(video_name, style_path, fps):
 
 	# starts uninitialized because there is no previous stylized frame at beginning
 	initial_stylized = initialize_stylized()
-	# preprocessing 
-	for f in range(len(frame_list)):
+	# preprocessing
+	num_frames = 3 
+	for f in range(num_frames):
 		# content target for this frame style transfer
 		content = frame_list[f]
 		stylized = initial_stylized
@@ -277,11 +278,7 @@ def stylize_video(video_name, style_path, fps):
 		# TODO: MAKE THIS WORK f, f+1, just numbers
 		# initial_stylized = apply_optical_flow(f, f+1, stylized)
 
-	for stylized_image in stylized_frame_list:
-			# Removes batch axis, converts image from BGR back to RGB, saves stylized image as "output.jpg" in same directory
-		output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
-		plt.imshow(output_image)
-		plt.show()
+	return stylized_frame_list
 
 # writes a list of numpy array frames to a video
 def write_video(frames, fps, filename):
@@ -293,10 +290,17 @@ def write_video(frames, fps, filename):
 	
 	video.release()
 
-# video_path = "elephant.mp4"
-# style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
+video_path = "tomjerry.mp4"
+style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 
-# stylize_video(video_path, style_path, 29)
+stylized_frames = stylize_video(video_path, style_path, 1)
+
+output_frames = []
+for stylized_image in stylized_frame_list:
+	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
+	output_frames.append(output_image)
+
+write_video(output_frames, 1, "output.mp4")
 
 # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 # style_path = 
