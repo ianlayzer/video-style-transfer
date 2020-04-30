@@ -290,7 +290,7 @@ def write_video(frames, fps, filename):
 		video.write(np.uint8(frame))
 	video.release()
 
-video = "tom_jerry_short.mp4"
+video = "fox.mp4"
 #style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 style_path = "../data/style/wave.jpg"
 # stylized_frames = stylize_video(video, style_path, 1)
@@ -301,12 +301,22 @@ style_path = "../data/style/wave.jpg"
 #	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
 #	output_frames.append(output_image)
 
-#write_video(output_frames, 1, "stylized_tom_jerry_short.mp4")
+# write_video(output_frames, 1, "stylized_tom_jerry_short.mp4")
 
+def my_stylize_video(video_name, style_path, fps):
+	stylized_frames = stylize_video(video, style_path, fps)
+	output_frames = []
+	for stylized_image in stylized_frames:
+		output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
+		output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+		output_frames.append(output_image)
+	write_video(output_frames, fps, "stylized_tom_video.mp4")
 
-content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+my_stylize_video(video, style_path, 1)
 
-stylize_image(content_path, style_path)
+# content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+
+# stylize_image(content_path, style_path)
 
 # Uncomment this if running in Colab:
 # from google.colab import files
