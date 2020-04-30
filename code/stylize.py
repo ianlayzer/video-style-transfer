@@ -17,6 +17,7 @@ style_layers = [2, 5, 8, 13, 18]
 
 model = make_vgg(image_height, image_width)
 
+
 def preprocess_image(image_path):
 	image = tf.io.read_file(image_path)
 	image = tf.image.decode_image(image, channels=3, dtype=tf.float32)
@@ -86,7 +87,7 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 	# optimize loss
 	optimizer = tf.optimizers.Adam(learning_rate=hp.learning_rate)
 	# Optimizes images to minimize loss between input content image/input style image and output stylized image
-	num_epochs = hp.epoch_num
+	num_epochs = 10
 	for e in range(num_epochs):
 		# Watches loss computation (output_stylized_img watched by default since declared as variable)
 		with tf.GradientTape() as tape:
@@ -95,18 +96,18 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 			stylized_style_feature_grams = features_to_grams(compute_all_feature_maps(stylized, style_layers))
 			# calculate loss
 			loss = get_total_loss(content_feature_maps, style_feature_grams, stylized_content_features, stylized_style_feature_grams, flow)
-		if e % 10 == 0:
-			print("Epoch " + str(e) + " Loss: " + str(loss))
+			if e % 10 == 0:
+				print("Epoch " + str(e) + " Loss: " + str(loss))
 		# calculate gradient of loss with respect to the stylized image (a variable)
 		grad = tape.gradient(loss, stylized)
 		# Applies this gradient to the image
 		optimizer.apply_gradients([(grad, stylized)])
 		# Clips image from 0-1, assigns gradient applied image to image variable
 		stylized.assign(tf.clip_by_value(stylized, clip_value_min=0.0, clip_value_max=1.0))
+	output_image = tf.reverse(tf.squeeze(stylized), axis=[-1]).numpy()
+	tf.keras.preprocessing.image.save_img('output.jpg', output_image)
 	# return to be used as initial stylized for next frame
 	return stylized
-
-	return output_image
 
 # computes list of feature map responses by passing image through network
 # up until each layer in layers
@@ -268,7 +269,7 @@ def stylize_video(video_name, style_path, fps):
 	for f in range(num_frames):
 		# content target for this frame style transfer
 		content = frame_list[f]
-		stylized = initial_stylized
+		stylized = tf.Variable(initial_stylized)
 		# stylize img
 		stylized = stylize_frame(content, style, stylized, style_feature_grams)
 		# add to stylized frame list
@@ -286,7 +287,7 @@ def write_video(frames, fps, filename):
 	video = VideoWriter(filename, fourcc, fps, (image_width, image_height))
 
 	for frame in frames:
-		video.write(frame)
+		video.write(np.uint8(frame))
 	
 	video.release()
 
@@ -296,7 +297,7 @@ style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQ
 stylized_frames = stylize_video(video_path, style_path, 1)
 
 output_frames = []
-for stylized_image in stylized_frame_list:
+for stylized_image in stylized_frames:
 	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
 	output_frames.append(output_image)
 
