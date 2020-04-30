@@ -241,7 +241,7 @@ def stylize_image(content_path, style_path):
 
 def stylize_video(video_name, style_path, fps):
 	# get preprocessed frame list
-	frame_list = preprocess_video(video_name)
+	frame_list = preprocess_video(video_name, fps)
 	# preprocess style image
 	style = preprocess_image(style_path)
 
@@ -253,7 +253,7 @@ def stylize_video(video_name, style_path, fps):
 	# list to add stylized frames to
 	stylized_frame_list = []
 	# stylize every frame
-	for f in range(len(frame_list)):
+	for f in range(1):
 		# content target for this frame style transfer
 		content = frame_list[f]
 		stylized = tf.Variable(initial_stylized)
@@ -268,10 +268,10 @@ def stylize_video(video_name, style_path, fps):
 
 	return stylized_frame_list
 
-def preprocess_video(video_name):
+def preprocess_video(video_name, fps):
 	# get video
 	video = VideoFileClip("./../data/content/video/" + video_name)
-	frames_iterable = video.iter_frames(fps=15)
+	frames_iterable = video.iter_frames(fps=fps)
 
 	image_height = hp.img_height
 	image_width = hp.img_width
@@ -291,28 +291,22 @@ def write_video(frames, fps, filename):
 	video.release()
 
 video = "tom_jerry_short.mp4"
-style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
+#style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
+style_path = "../data/style/wave.jpg"
+# stylized_frames = stylize_video(video, style_path, 1)
 
-stylized_frames = stylize_video(video, style_path, 24)
+#output_frames = []
+#for stylized_image in stylized_frames:
+#	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
+#	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+#	output_frames.append(output_image)
 
-output_frames = []
-for stylized_image in stylized_frames:
-	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
-	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-	plt.imshow(output_image)
-	plt.show()
-	output_frames.append(output_image)
+#write_video(output_frames, 1, "stylized_tom_jerry_short.mp4")
 
-write_video(output_frames, 15, "stylized_tom_jerry_short.mp4")
 
-# content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-# style_path = 
+content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 
-# content = preprocess_image(content_path)
-# style = preprocess_image(style_path)
-# stylized = initialize_stylized()
-# stylize_frame(content, style, stylized)
-
+stylize_image(content_path, style_path)
 
 # Uncomment this if running in Colab:
 # from google.colab import files
