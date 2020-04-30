@@ -268,14 +268,24 @@ def stylize_video(video_name, style_path, fps):
 	return stylized_frame_list
 
 def preprocess_video(video_name):
-	# get video
-	video = VideoFileClip("./../data/content/video/" + video_name)
-	frames_iterable = video.iter_frames(fps=0.1)
-
-	# preprocess and add each frame in frame iterable to python list for indexing
 	frame_list = []
-	for frame in frames_iterable:
-		frame_list.append(preprocess_frame(frame))
+	video = cv2.VideoCapture("./../data/content/video/" + video_name)
+	i = 0
+    # a variable to set how many frames you want to skip
+	frame_skip = 100
+	while video.isOpened():
+		ret, frame = video.read()
+		if not ret:
+			break
+		if i > frame_skip - 1:
+			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+			frame_list.append(preprocess_frame(frame))
+			i = 0
+			continue
+		i += 1
+
+	video.release()
+
 	return frame_list
 
 # writes a list of numpy array frames to a video
@@ -289,8 +299,8 @@ def write_video(frames, fps, filename):
 video = "tomjerry.mp4"
 style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 
-content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-stylize_image(content_path, style_path)
+# content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+# stylize_image(content_path, style_path)
 
 
 

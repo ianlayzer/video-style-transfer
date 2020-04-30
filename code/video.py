@@ -50,28 +50,34 @@ import matplotlib.pyplot as plt
 video = VideoFileClip("./../data/content/video/tomjerry.mp4")
 frames_iterable = video.iter_frames(fps=0.1)
 
-for frame in frames_iterable:
-    plt.imshow(frame)
-    plt.show()
+
+# frames_list = []
+# for frame in frames_iterable:
+#     # plt.imshow(frame)
+#     # plt.show()
+#     frames_list.append(frame)
+
+# print(len(frames_list))
 
 
-# video = cv2.VideoCapture("./../data/content/video/tomjerry.mp4")
-# i = 0
-# # a variable to set how many frames you want to skip
-# frame_skip = 100
-# while video.isOpened():
-#     ret, frame = video.read()
-#     if not ret:
-#         break
-#     if i > frame_skip - 1:
-#         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#         print(frame.dtype)
-#         i = 0
-#         continue
-#     i += 1
+video = cv2.VideoCapture("./../data/content/video/tomjerry.mp4")
+i = 0
+# a variable to set how many frames you want to skip
+frame_skip = 100
+while video.isOpened():
+    ret, frame = video.read()
+    if not ret:
+        break
+    if i > frame_skip - 1:
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        plt.imshow(frame)
+        plt.show()
+        i = 0
+        continue
+    i += 1
 
-# video.release()
-# cv2.destroyAllWindows()
+video.release()
+cv2.destroyAllWindows()
 
 
 
@@ -97,4 +103,18 @@ for frame in frames_iterable:
 
 # 	video.release()
 
+# 	return frame_list
+
+
+
+###########
+# def preprocess_video(video_name):
+# 	# get video
+# 	video = VideoFileClip("./../data/content/video/" + video_name)
+# 	frames_iterable = video.iter_frames(fps=0.1)
+
+# 	# preprocess and add each frame in frame iterable to python list for indexing
+# 	frame_list = []
+# 	for frame in frames_iterable:
+# 		frame_list.append(preprocess_frame(frame))
 # 	return frame_list
