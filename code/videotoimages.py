@@ -2,6 +2,7 @@ from moviepy.editor import *
 import tensorflow as tf
 import numpy as np
 import cv2
+from pyflow import demo
 
 # This 
 import os
@@ -55,8 +56,7 @@ def video_to_images(video_name, fps):
 		next_image = next_image.numpy()
 
 		if num_frames > 2:
-			flow = get_flow_vectors(prev_image, curr_image)
-
+			flow = demo.calculateFlow(prev_image, curr_image)
 			h, w = flow.shape[:2]
 			fx, fy = flow[:,:,0], flow[:,:,1]
 			ang = np.arctan2(fy, fx) + np.pi
@@ -98,8 +98,8 @@ def compute_disocclusion_mask(prev_frame, curr_frame, next_frame):
 	# TODO: implement weights matrix where value is 0 if pixel is disoccluded and
 	# 1 otherwise?
 
-	forward_flow = get_flow_vectors(prev_frame, curr_frame)
-	backward_flow = get_flow_vectors(next_frame, curr_frame)
+	forward_flow = demo.calculateFlow(prev_frame, curr_frame)
+	backward_flow = demo.calculateFlow(next_frame, curr_frame)
 
 	# forward_warp = apply_optical_flow(forward_flow, prev_frame)
 	# backward_warp = apply_optical_flow(backward_flow, next_frame)
@@ -122,7 +122,7 @@ def get_temporal_loss(previous_stylized, previous_content, current_content, curr
 	
 	# TODO: implement temporal loss between 
 
-	flow = get_flow_vectors(previous_content, current_content)
+	flow = demo.calculateFlow(previous_content, current_content)
 
 	warped_style_curr = apply_optical_flow(flow, previous_stylized)
 
