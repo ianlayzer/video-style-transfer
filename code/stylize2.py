@@ -4,6 +4,7 @@ import hyperparameters as hp
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from moviepy.editor import *
 from cv2 import VideoWriter, VideoWriter_fourcc
 
 # refactored functions to work with both images and video
@@ -93,8 +94,8 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 			stylized_style_feature_grams = features_to_grams(compute_all_feature_maps(stylized, style_layers))
 			# calculate loss
 			loss = get_total_loss(content_feature_maps, style_feature_grams, stylized_content_features, stylized_style_feature_grams, flow)
-		if e % 10 == 0:
-			print("Epoch " + str(e) + " Loss: " + str(loss))
+		if e % 100 == 0:
+			print("Epoch " + str(e) + " Loss: " + str(loss.numpy()))
 		# calculate gradient of loss with respect to the stylized image (a variable)
 		grad = tape.gradient(loss, stylized)
 		# Applies this gradient to the image
@@ -267,25 +268,14 @@ def stylize_video(video_name, style_path, fps):
 	return stylized_frame_list
 
 def preprocess_video(video_name):
+	# get video
+	video = VideoFileClip("./../data/content/video/" + video_name)
+	frames_iterable = video.iter_frames(fps=0.1)
+
+	# preprocess and add each frame in frame iterable to python list for indexing
 	frame_list = []
-	video = cv2.VideoCapture("./../data/content/video/" + video_name)
-	i = 0
-    # a variable to set how many frames you want to skip
-	frame_skip = 100
-	while video.isOpened():
-		ret, frame = video.read()
-		if not ret:
-			break
-		if i > frame_skip - 1:
-			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-			frame_list.append(preprocess_frame(frame))
-			i = 0
-			continue
-		i += 1
-
-	video.release()
-	cv2.destroyAllWindows()
-
+	for frame in frames_iterable:
+		frame_list.append(preprocess_frame(frame))
 	return frame_list
 
 # writes a list of numpy array frames to a video
@@ -296,7 +286,7 @@ def write_video(frames, fps, filename):
 		video.write(np.uint8(frame))
 	video.release()
 
-video = "tom_jerry_short.mp4"
+video = "tomjerry.mp4"
 style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 
 content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
