@@ -88,9 +88,6 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 	optimizer = tf.optimizers.Adam(learning_rate=hp.learning_rate)
 	# Optimizes images to minimize loss between input content image/input style image and output stylized image
 	for e in range(num_epochs):
-		if e % 10 == 0:
-			print("Epoch " + str(e) + " Loss: " + str(loss))
-
 		# Watches loss computation (output_stylized_img watched by default since declared as variable)
 		with tf.GradientTape() as tape:
 			# compute stylized features response to content and style layers
@@ -98,6 +95,8 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 			stylized_style_feature_grams = features_to_grams(compute_all_feature_maps(stylized, style_layers))
 			# calculate loss
 			loss = get_total_loss(content_feature_maps, style_feature_grams, stylized_content_features, stylized_style_feature_grams, flow)
+		if e % 10 == 0:
+			print("Epoch " + str(e) + " Loss: " + str(loss))
 		# calculate gradient of loss with respect to the stylized image (a variable)
 		grad = tape.gradient(loss, stylized)
 		# Applies this gradient to the image
