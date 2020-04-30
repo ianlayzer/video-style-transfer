@@ -4,7 +4,7 @@ import hyperparameters as hp
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from moviepy.editor import *
+# from moviepy.editor import *
 from cv2 import VideoWriter, VideoWriter_fourcc
 import numpy as np
 
@@ -270,18 +270,18 @@ def stylize_video(video_name, style_path, fps):
 	return stylized_frame_list
 
 def preprocess_video(video_name):
-	# get video
-	video = VideoFileClip("./../data/content/video/" + video_name)
-	frames_iterable = video.iter_frames(fps=15)
+	# # get video
+	# video = VideoFileClip("./../data/content/video/" + video_name)
+	# frames_iterable = video.iter_frames(fps=15)
 
-	image_height = hp.img_height
-	image_width = hp.img_width
+	# image_height = hp.img_height
+	# image_width = hp.img_width
 
-	# preprocess and add each frame in frame iterable to python list for indexing
-	frame_list = []
-	for frame in frames_iterable:
-		frame_list.append(preprocess_frame(frame))
-	return frame_list
+	# # preprocess and add each frame in frame iterable to python list for indexing
+	# frame_list = []
+	# for frame in frames_iterable:
+	# 	frame_list.append(preprocess_frame(frame))
+	# return frame_list
 
 # writes a list of numpy array frames to a video
 def write_video(frames, fps, filename):
