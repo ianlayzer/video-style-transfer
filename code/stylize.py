@@ -299,8 +299,6 @@ output_frames = []
 for stylized_image in stylized_frames:
 	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
 	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-	plt.imshow(output_image)
-	plt.show()
 	output_frames.append(output_image)
 
 write_video(output_frames, 15, "stylized_tom_jerry_short.mp4")
