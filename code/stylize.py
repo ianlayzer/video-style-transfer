@@ -43,7 +43,7 @@ def initialize_stylized():
 	output_stylized_img = tf.Variable(output_stylized_img)
 	return output_stylized_img
 
-def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None, use_temporal_loss=False, frames=None):
+def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None, use_temporal_loss=False, frames=None,  num_epochs=1000):
 	"""Generates a stylized still image frame using the content from content, the
 	style from style. The stylized image is initialized as the inputted stylized image.
 	We can also pass in stylized feature maps rather than a stylized image, in which
@@ -87,7 +87,6 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 	# optimize loss
 	optimizer = tf.optimizers.Adam(learning_rate=hp.learning_rate)
 	# Optimizes images to minimize loss between input content image/input style image and output stylized image
-	num_epochs = 10
 	for e in range(num_epochs):
 		# Watches loss computation (output_stylized_img watched by default since declared as variable)
 		with tf.GradientTape() as tape:
@@ -241,32 +240,20 @@ def stylize_image(content_path, style_path):
 
 
 def stylize_video(video_name, style_path, fps):
-	# get video
-	video = VideoFileClip("./../data/content/video/" + video_name)
-	frames_iterable = video.iter_frames(fps=fps)
-
-	image_height = hp.img_height
-	image_width = hp.img_width
-
-	# preprocess and add each frame in frame iterable to python list for indexing
-	frame_list = []
-	for frame in frames_iterable:
-		frame_list.append(preprocess_frame(frame))
-
-	# list to add stylized frames to
-	stylized_frame_list = []
-
+	# get preprocessed frame list
+	frame_list = preprocess_video(video_name)
 	# preprocess style image
 	style = preprocess_image(style_path)
 
 	# precompute style image feature response
 	style_feature_grams = features_to_grams(compute_all_feature_maps(style, style_layers))
-
 	# starts uninitialized because there is no previous stylized frame at beginning
 	initial_stylized = initialize_stylized()
-	# preprocessing
-	num_frames = 3 
-	for f in range(num_frames):
+
+	# list to add stylized frames to
+	stylized_frame_list = []
+	# stylize every frame
+	for f in range(len(frame_list)):
 		# content target for this frame style transfer
 		content = frame_list[f]
 		stylized = tf.Variable(initial_stylized)
@@ -281,27 +268,42 @@ def stylize_video(video_name, style_path, fps):
 
 	return stylized_frame_list
 
+def preprocess_video(video_name):
+	# get video
+	video = VideoFileClip("./../data/content/video/" + video_name)
+	frames_iterable = video.iter_frames(fps=15)
+
+	image_height = hp.img_height
+	image_width = hp.img_width
+
+	# preprocess and add each frame in frame iterable to python list for indexing
+	frame_list = []
+	for frame in frames_iterable:
+		frame_list.append(preprocess_frame(frame))
+	return frame_list
+
 # writes a list of numpy array frames to a video
 def write_video(frames, fps, filename):
 	fourcc = VideoWriter_fourcc(*'mp4v')
 	video = VideoWriter(filename, fourcc, fps, (image_width, image_height))
-
 	for frame in frames:
 		video.write(np.uint8(frame))
-	
 	video.release()
 
-video_path = "tomjerry.mp4"
+video = "tom_jerry_short.mp4"
 style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 
-stylized_frames = stylize_video(video_path, style_path, 1)
+stylized_frames = stylize_video(video, style_path, 24)
 
 output_frames = []
 for stylized_image in stylized_frames:
 	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
+	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+	plt.imshow(output_image)
+	plt.show()
 	output_frames.append(output_image)
 
-write_video(output_frames, 1, "output.mp4")
+write_video(output_frames, 15, "stylized_tom_jerry_short.mp4")
 
 # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 # style_path = 
