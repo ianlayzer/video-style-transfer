@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import cv2
 from pyflow import demo
+import skimage
 
 # This 
 import os
@@ -57,6 +58,7 @@ def video_to_images(video_name, fps):
 
 		if num_frames > 2:
 			flow = demo.calculateFlow(prev_image, curr_image)
+
 			h, w = flow.shape[:2]
 			fx, fy = flow[:,:,0], flow[:,:,1]
 			ang = np.arctan2(fy, fx) + np.pi
@@ -163,7 +165,7 @@ def apply_optical_flow(flow, frame):
 	# print(flow.dtype)
 	flow[:,:,0] += np.arange(w)
 	flow[:,:,1] += np.arange(h)[:,np.newaxis]
-
+	flow = skimage.img_as_float32(flow)
 	res = cv2.remap(frame, flow, None, cv2.INTER_LINEAR)
 
 	return res
