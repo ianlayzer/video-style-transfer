@@ -282,6 +282,7 @@ def preprocess_video(video_name):
 	# for frame in frames_iterable:
 	# 	frame_list.append(preprocess_frame(frame))
 	# return frame_list
+	return
 
 # writes a list of numpy array frames to a video
 def write_video(frames, fps, filename):
