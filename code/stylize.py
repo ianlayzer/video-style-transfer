@@ -292,7 +292,7 @@ def write_video(frames, fps, filename):
 
 video = "fox.mp4"
 #style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
-style_path = "../data/style/wave.jpg"
+style_path = "../data/style/udnie.jpg"
 # stylized_frames = stylize_video(video, style_path, 1)
 
 #output_frames = []
@@ -301,7 +301,6 @@ style_path = "../data/style/wave.jpg"
 #	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
 #	output_frames.append(output_image)
 
-# write_video(output_frames, 1, "stylized_tom_jerry_short.mp4")
 
 def my_stylize_video(video_name, style_path, fps):
 	stylized_frames = stylize_video(video, style_path, fps)
