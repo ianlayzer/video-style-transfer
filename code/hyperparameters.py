@@ -1,17 +1,15 @@
 # weights for content and style loss (α, β, γ in Ruder et al.)
-content_loss_weight = 10000
+content_loss_weight = 30000
 style_loss_weight = 0.03
 temporal_loss_weight = 1
 
 # img dimensions
-img_height = 224
-img_width = 224
+img_height = 400
+img_width = 400
 
 # learning rate for gradient descent
 learning_rate = 0.04
 
 # number of iterations for gradient descent
-num_iterations = 2000
-
 epoch_num = 1000
 
