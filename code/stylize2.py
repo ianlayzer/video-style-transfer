@@ -4,9 +4,7 @@ import hyperparameters as hp
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-# from moviepy.editor import *
 from cv2 import VideoWriter, VideoWriter_fourcc
-import numpy as np
 
 # refactored functions to work with both images and video
 image_height = hp.img_height
@@ -67,7 +65,7 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 		- frames: a list [prev_frame, curr_frame, next_frame]
 	"""
 	# the previous stylized frame
-	previous_stylized = tf.identity(initial_stylized)
+	# previous_stylized = tf.identity(initial_stylized)
 
 	# TODO: temporal weights mask
 	flow = []
@@ -76,9 +74,9 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 		weights_mask = compute_disocclusion_mask(frames[0], frames[1], frames[2])
 		flow = get_flow_vectors(frames[0], frames[1])
 
-	stylized = initial_stylized # NOTE: SHOULD THIS BE PREVIOUS STYLIZED?
+	stylized = initial_stylized
 	# we will compare stylized responses against these at each epoch to calculate loss
-	content_feature_maps = compute_all_feature_maps(content, content_layers) # NOTE: just computes one feature map for content
+	content_feature_maps = compute_all_feature_maps(content, content_layers)
 	style_feature_grams = precomputed_style_grams
 	# check if we need to compute style target style responses now or if already computed
 	if style_feature_grams is None:
@@ -128,7 +126,7 @@ def compute_feature_map(img, max_layer):
 
 def features_to_grams(feature_maps):
 	grams = []
-	for i in range(len(feature_maps)): # NOTE: can change to for each loop
+	for i in range(len(feature_maps)):
 		g = compute_feature_map_gram(feature_maps[i])
 		grams.append(g)
 	return grams
@@ -247,41 +245,48 @@ def stylize_video(video_name, style_path, fps):
 
 	# precompute style image feature response
 	style_feature_grams = features_to_grams(compute_all_feature_maps(style, style_layers))
-	# starts uninitialized because there is no previous stylized frame at beginning
-	initial_stylized = initialize_stylized()
 
+
+	# starts uninitialized because there is no previous stylized frame at beginning
+	previous = initialize_stylized()
 	# list to add stylized frames to
 	stylized_frame_list = []
 	# stylize every frame
 	for f in range(len(frame_list)):
 		# content target for this frame style transfer
 		content = frame_list[f]
-		stylized = tf.Variable(initial_stylized)
 		# stylize img
-		stylized = stylize_frame(content, style, stylized, style_feature_grams)
+		stylized = stylize_frame(content, style, previous, style_feature_grams)
 		# add to stylized frame list
 		stylized_frame_list.append(stylized)
 		# update previous stylized frame to the frame we just stylized with optical flow applied
-		initial_stylized = tf.identity(stylized)
+		previous = stylized
 		# TODO: MAKE THIS WORK f, f+1, just numbers
 		# initial_stylized = apply_optical_flow(f, f+1, stylized)
 
 	return stylized_frame_list
 
 def preprocess_video(video_name):
-	# # get video
-	# video = VideoFileClip("./../data/content/video/" + video_name)
-	# frames_iterable = video.iter_frames(fps=15)
+	frame_list = []
+	video = cv2.VideoCapture("./../data/content/video/" + video_name)
+	i = 0
+    # a variable to set how many frames you want to skip
+	frame_skip = 100
+	while video.isOpened():
+		ret, frame = video.read()
+		if not ret:
+			break
+		if i > frame_skip - 1:
+			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+			frame_list.append(preprocess_frame(frame))
+			i = 0
+			continue
+		i += 1
 
-	# image_height = hp.img_height
-	# image_width = hp.img_width
+	video.release()
+	cv2.destroyAllWindows()
 
-	# # preprocess and add each frame in frame iterable to python list for indexing
-	# frame_list = []
-	# for frame in frames_iterable:
-	# 	frame_list.append(preprocess_frame(frame))
-	# return frame_list
-	return
+	return frame_list
 
 # writes a list of numpy array frames to a video
 def write_video(frames, fps, filename):
@@ -302,17 +307,17 @@ stylize_image(content_path, style_path)
 
 # !! COMMENTED #
 
-# stylized_frames = stylize_video(video, style_path, 24)
+stylized_frames = stylize_video(video, style_path, 24)
 
-# output_frames = []
-# for stylized_image in stylized_frames:
-# 	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
-# 	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-# 	plt.imshow(output_image)
-# 	plt.show()
-# 	output_frames.append(output_image)
+output_frames = []
+for stylized_image in stylized_frames:
+	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
+	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+	plt.imshow(output_image)
+	plt.show()
+	output_frames.append(output_image)
 
-# write_video(output_frames, 15, "stylized_tom_jerry_short.mp4")
+write_video(output_frames, 1, "./../data/content/video/test.mp4")
 
 # !! COMMENTED #
 
