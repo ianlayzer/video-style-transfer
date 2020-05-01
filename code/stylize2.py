@@ -310,7 +310,7 @@ stylized_frames = stylize_video(video, style_path, 24)
 
 output_frames = []
 for stylized_image in stylized_frames:
-	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
+	output_image = tf.squeeze(stylized_image).numpy()
 	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
 	plt.imshow(output_image)
 	plt.show()
