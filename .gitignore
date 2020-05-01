@@ -10,3 +10,4 @@ results/*
 *.fls
 *.fdb_latexmk
 *.aux
+data/content/video/test.mp4
