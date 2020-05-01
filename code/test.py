@@ -4,7 +4,7 @@ from cv2 import VideoWriter, VideoWriter_fourcc
 import numpy as np
 
 frames_list = []
-cap = cv2.VideoCapture('./../data/content/video/tomjerry.mp4')
+cap = cv2.VideoCapture('../data/content/video/tomjerry.mp4')
 i = 0
 frame_skip = 100
 while cap.isOpened():
@@ -24,7 +24,7 @@ while cap.isOpened():
 cap.release()
 
 fourcc = VideoWriter_fourcc(*'mp4v')
-video = VideoWriter('./../data/content/video/test.mp4', fourcc, 1, (360, 640))
+video = VideoWriter('../data/content/video/test.mp4', fourcc, 1, (360, 640))
 for frame in frames_list:
     video.write(np.asarray(frame, np.uint8))
 video.release()
