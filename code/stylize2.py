@@ -265,9 +265,8 @@ def stylize_video(video_name, style_path, fps):
 		# stylize img
 		stylized = stylize_frame(content, style, previous, style_feature_grams)
 		# add to stylized frame list
-		# to_append = tf.identity(stylized) # CHANGE TO tf.Variable()
-		# stylized_frame_list.append(to_append)
-		stylized_frame_list.append(stylized)
+		to_append = tf.identity(stylized)
+		stylized_frame_list.append(to_append)
 
 		# update previous stylized frame to the frame we just stylized with optical flow applied
 		previous = stylized
@@ -281,7 +280,7 @@ def preprocess_video(video_name):
 	video = cv2.VideoCapture("./../data/content/video/" + video_name)
 	i = 0
     # a variable to set how many frames you want to skip
-	frame_skip = 100
+	frame_skip = 10
 	while video.isOpened():
 		ret, frame = video.read()
 		if not ret:
@@ -337,7 +336,7 @@ for stylized_image in stylized_frames:
 print("output_frames length")
 print(len(output_frames))
 
-write_video(output_frames, 1, "./../data/content/video/test.mp4")
+write_video(output_frames, 2.778, "./../data/content/video/test.mp4")
 
 # !! COMMENTED #
 
