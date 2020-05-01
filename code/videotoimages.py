@@ -58,6 +58,7 @@ def video_to_images(video_name, fps):
 
 		if num_frames > 2:
 			flow = demo.calculateFlow(prev_image, curr_image)
+			flow2 = get_flow_vectors(prev_image, curr_image)
 
 			h, w = flow.shape[:2]
 			fx, fy = flow[:,:,0], flow[:,:,1]
@@ -69,18 +70,34 @@ def video_to_images(video_name, fps):
 			hsv[...,2] = cv2.normalize(v, None, 0, 255, cv2.NORM_MINMAX)
 			rgb = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
+			# h2, w2 = flow2.shape[:2]
+			# fx2, fy2 = flow2[:,:,0], flow2[:,:,1]
+			# ang2 = np.arctan2(fy2, fx2) + np.pi
+			# v2 = np.sqrt(fx2*fx2+fy2*fy2)
+			# hsv2 = np.zeros((h2, w2, 3), np.uint8)
+			# hsv2[...,0] = ang2*(180/np.pi/2)
+			# hsv2[...,1] = 255
+			# hsv2[...,2] = cv2.normalize(v2, None, 0, 255, cv2.NORM_MINMAX)
+			# rgb2 = cv2.cvtColor(hsv2, cv2.COLOR_HSV2RGB)
+
 			im2w = apply_optical_flow(flow, prev_image)
 			mask = compute_disocclusion_mask(prev_image, curr_image, next_image)
+			# im2w2 = apply_optical_flow(flow2, prev_image)
 			# print(np.average(mask))
 			# print(mask[0])
-
+		
 			cv2.imshow("flow",rgb)
-			cv2.imshow("1", prev_image)
+			# cv2.imshow("flow2",rgb2)
+			# cv2.imshow("1", prev_image)
 			cv2.imshow("2", curr_image)
+
 			# cv2.imshow("bool", (np.where(mask, 1, 0)).astype(np.float32))
 			cv2.imshow("remapped", (im2w))
+			# cv2.imshow("remapped2", (im2w2))
 
-			cv2.waitKey(6000)
+
+			cv2.waitKey(15000)
+			
 
 			cv2.destroyAllWindows()
 

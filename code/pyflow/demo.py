@@ -10,11 +10,13 @@ import time
 import argparse
 import pyflow
 from pyflow import pyflow
+import cv2
 
 def calculateFlow(im1, im2) :
 
-    im1 = im1.astype(float) / 255.
-    im2 = im2.astype(float) / 255.
+    im1 = im1.astype(float)
+    im2 = im2.astype(float)
+    
 
     # Flow Options:
     alpha = 0.012
