@@ -253,6 +253,7 @@ def stylize_video(video_name, style_path, fps):
 	stylized_frame_list = []
 	# stylize every frame
 	for f in range(len(frame_list)):
+		print("- Stylizing Frame " + str(f+1))
 		# content target for this frame style transfer
 		content = frame_list[f]
 		# stylize img
@@ -271,7 +272,7 @@ def preprocess_video(video_name):
 	video = cv2.VideoCapture("./../data/content/video/" + video_name)
 	i = 0
     # a variable to set how many frames you want to skip
-	frame_skip = 150
+	frame_skip = 100
 	while video.isOpened():
 		ret, frame = video.read()
 		if not ret:
@@ -284,7 +285,7 @@ def preprocess_video(video_name):
 		i += 1
 
 	video.release()
-
+	print("Stylizing " + str(len(frame_list)) + " frames")
 	return frame_list
 
 # writes a list of numpy array frames to a video
