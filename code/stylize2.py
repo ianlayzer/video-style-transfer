@@ -265,7 +265,8 @@ def stylize_video(video_name, style_path, fps):
 		# stylize img
 		stylized = stylize_frame(content, style, previous, style_feature_grams)
 		# add to stylized frame list
-		stylized_frame_list.append(stylized)
+		to_append = tf.identity(stylized)
+		stylized_frame_list.append(to_append)
 		# update previous stylized frame to the frame we just stylized with optical flow applied
 		previous = stylized
 		# TODO: MAKE THIS WORK f, f+1, just numbers
