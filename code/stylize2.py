@@ -1,6 +1,6 @@
 import tensorflow as tf
 from model import make_vgg
-import hyperparameters as hp
+import hyperparameters2 as hp
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
