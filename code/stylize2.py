@@ -285,7 +285,7 @@ def preprocess_video(video_name):
 		i += 1
 
 	video.release()
-	print("Stylizing " + str(len(frame_list)) + " frames")
+	print("- Stylizing " + str(len(frame_list)) + " frames")
 	return frame_list
 
 # writes a list of numpy array frames to a video
@@ -308,6 +308,14 @@ style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQ
 # !! COMMENTED #
 
 stylized_frames = stylize_video(video, style_path, 24)
+print("stylized_frames length")
+print(len(stylized_frames))
+
+for x in range (len(stylized_frames)):
+	output_image = stylized_frames[x]
+	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
+	tf.keras.preprocessing.image.save_img('output' + str(x) + '.jpg', output_image)
+
 
 output_frames = []
 for stylized_image in stylized_frames:
@@ -316,6 +324,9 @@ for stylized_image in stylized_frames:
 	plt.imshow(output_image)
 	plt.show()
 	output_frames.append(output_image)
+
+print("output_frames length")
+print(len(output_frames))
 
 write_video(output_frames, 1, "./../data/content/video/test.mp4")
 
