@@ -293,7 +293,7 @@ def write_video(frames, fps, filename):
 	fourcc = VideoWriter_fourcc(*'mp4v')
 	video = VideoWriter(filename, fourcc, fps, (image_width, image_height))
 	for frame in frames:
-		video.write(np.uint8(frame))
+		video.write(frame)
 	video.release()
 
 video = "tomjerry.mp4"

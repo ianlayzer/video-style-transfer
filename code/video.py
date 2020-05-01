@@ -1,6 +1,7 @@
 import cv2
 import matplotlib.pyplot as plt
 from cv2 import VideoWriter, VideoWriter_fourcc
+from moviepy.editor import *
 import numpy as np
 
 frames_list = []
@@ -14,8 +15,8 @@ while cap.isOpened():
     if i > frame_skip - 1:
         # cv2.imwrite('test_'+str(i)+'.jpg', frame)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # plt.imshow(frame)
-        # plt.show()
+        plt.imshow(frame)
+        plt.show()
         frames_list.append(frame)
         i = 0
         continue
@@ -23,11 +24,27 @@ while cap.isOpened():
 
 cap.release()
 
-fourcc = VideoWriter_fourcc(*'mp4v')
-video = VideoWriter('./../data/content/video/test.mp4', fourcc, 1, (360, 640))
+# print(len(frames_list))
+
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+video = VideoWriter('./../data/content/video/test.mp4', fourcc, 1, (640, 360))
 for frame in frames_list:
-    video.write(np.asarray(frame, np.uint8))
+    video.write(frame)
 video.release()
+cv2.destroyAllWindows()
+
+# video = VideoFileClip("./../data/content/video/tomjerry.mp4")
+# frames_iterable = video.iter_frames(fps=1)
+
+
+# # frames_list = []
+# # for frame in frames_iterable:
+# #     plt.imshow(frame)
+# #     plt.show()
+# #     frame = np.asarray(frame, dtype=np.uint8)
+# #     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+# #     print(frame.shape)
+# #     frames_list.append(frame)
 
 
 
