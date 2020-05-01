@@ -271,7 +271,7 @@ def preprocess_video(video_name):
 	video = cv2.VideoCapture("./../data/content/video/" + video_name)
 	i = 0
     # a variable to set how many frames you want to skip
-	frame_skip = 100
+	frame_skip = 150
 	while video.isOpened():
 		ret, frame = video.read()
 		if not ret:
