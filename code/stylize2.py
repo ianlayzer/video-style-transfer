@@ -1,12 +1,10 @@
 import tensorflow as tf
 from model import make_vgg
-import hyperparameters as hp
+import hyperparameters2 as hp
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from moviepy.editor import *
 from cv2 import VideoWriter, VideoWriter_fourcc
-import numpy as np
 
 # refactored functions to work with both images and video
 image_height = hp.img_height
@@ -67,7 +65,7 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 		- frames: a list [prev_frame, curr_frame, next_frame]
 	"""
 	# the previous stylized frame
-	previous_stylized = tf.identity(initial_stylized)
+	# previous_stylized = tf.identity(initial_stylized)
 
 	# TODO: temporal weights mask
 	flow = []
@@ -95,8 +93,8 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 			stylized_style_feature_grams = features_to_grams(compute_all_feature_maps(stylized, style_layers))
 			# calculate loss
 			loss = get_total_loss(content_feature_maps, style_feature_grams, stylized_content_features, stylized_style_feature_grams, flow)
-			if e % 10 == 0:
-				print("Epoch " + str(e) + " Loss: " + str(loss))
+		if e % 100 == 0:
+			print("Epoch " + str(e) + " Loss: " + str(loss.numpy()))
 		# calculate gradient of loss with respect to the stylized image (a variable)
 		grad = tape.gradient(loss, stylized)
 		# Applies this gradient to the image
@@ -104,7 +102,7 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 		# Clips image from 0-1, assigns gradient applied image to image variable
 		stylized.assign(tf.clip_by_value(stylized, clip_value_min=0.0, clip_value_max=1.0))
 	output_image = tf.reverse(tf.squeeze(stylized), axis=[-1]).numpy()
-	tf.keras.preprocessing.image.save_img('output.jpg', output_image)
+	tf.keras.preprocessing.image.save_img('stylizedrand' + str(np.random.randint(low=10, high=1000)) + '.jpg', output_image)
 	# return to be used as initial stylized for next frame
 	return stylized
 
@@ -241,45 +239,61 @@ def stylize_image(content_path, style_path):
 
 def stylize_video(video_name, style_path, fps):
 	# get preprocessed frame list
-	frame_list = preprocess_video(video_name, fps)
+	frame_list = preprocess_video(video_name)
+
+	for x in range (len(frame_list)):
+		output_image = frame_list[x]
+		output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
+		tf.keras.preprocessing.image.save_img('frame' + str(x) + '.jpg', output_image)
+
 	# preprocess style image
 	style = preprocess_image(style_path)
 
 	# precompute style image feature response
 	style_feature_grams = features_to_grams(compute_all_feature_maps(style, style_layers))
-	# starts uninitialized because there is no previous stylized frame at beginning
-	initial_stylized = initialize_stylized()
 
+
+	# starts uninitialized because there is no previous stylized frame at beginning
+	previous = initialize_stylized()
 	# list to add stylized frames to
 	stylized_frame_list = []
 	# stylize every frame
-	for f in range(1):
+	for f in range(len(frame_list)):
+		print("- Stylizing Frame " + str(f+1))
 		# content target for this frame style transfer
 		content = frame_list[f]
-		stylized = tf.Variable(initial_stylized)
 		# stylize img
-		stylized = stylize_frame(content, style, stylized, style_feature_grams)
+		stylized = stylize_frame(content, style, previous, style_feature_grams)
 		# add to stylized frame list
-		stylized_frame_list.append(stylized)
+		to_append = tf.identity(stylized)
+		stylized_frame_list.append(to_append)
+
 		# update previous stylized frame to the frame we just stylized with optical flow applied
-		initial_stylized = tf.identity(stylized)
+		previous = stylized
 		# TODO: MAKE THIS WORK f, f+1, just numbers
 		# initial_stylized = apply_optical_flow(f, f+1, stylized)
 
 	return stylized_frame_list
 
-def preprocess_video(video_name, fps):
-	# get video
-	video = VideoFileClip("./../data/content/video/" + video_name)
-	frames_iterable = video.iter_frames(fps=fps)
-
-	image_height = hp.img_height
-	image_width = hp.img_width
-
-	# preprocess and add each frame in frame iterable to python list for indexing
+def preprocess_video(video_name):
 	frame_list = []
-	for frame in frames_iterable:
-		frame_list.append(preprocess_frame(frame))
+	video = cv2.VideoCapture("./../data/content/video/" + video_name)
+	i = 0
+    # a variable to set how many frames you want to skip
+	frame_skip = 10
+	while video.isOpened():
+		ret, frame = video.read()
+		if not ret:
+			break
+		if i > frame_skip - 1:
+			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+			frame_list.append(preprocess_frame(frame))
+			i = 0
+			continue
+		i += 1
+
+	video.release()
+	print("- Stylizing " + str(len(frame_list)) + " frames")
 	return frame_list
 
 # writes a list of numpy array frames to a video
@@ -287,35 +301,53 @@ def write_video(frames, fps, filename):
 	fourcc = VideoWriter_fourcc(*'mp4v')
 	video = VideoWriter(filename, fourcc, fps, (image_width, image_height))
 	for frame in frames:
-		video.write(np.uint8(frame))
+		video.write(frame)
 	video.release()
 
-video = "fox.mp4"
-#style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
-style_path = "../data/style/udnie.jpg"
-# stylized_frames = stylize_video(video, style_path, 1)
-
-#output_frames = []
-#for stylized_image in stylized_frames:
-#	output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
-#	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-#	output_frames.append(output_image)
-
-
-def my_stylize_video(video_name, style_path, fps):
-	stylized_frames = stylize_video(video, style_path, fps)
-	output_frames = []
-	for stylized_image in stylized_frames:
-		output_image = tf.reverse(tf.squeeze(stylized_image), axis=[-1]).numpy()
-		output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-		output_frames.append(output_image)
-	write_video(output_frames, fps, "stylized_tom_video.mp4")
-
-my_stylize_video(video, style_path, 1)
+video = "tomjerry.mp4"
+style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 
 # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-
 # stylize_image(content_path, style_path)
+
+
+
+
+# !! COMMENTED #
+
+stylized_frames = stylize_video(video, style_path, 24)
+print("stylized_frames length")
+print(len(stylized_frames))
+
+for x in range (len(stylized_frames)):
+	output_image = stylized_frames[x]
+	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
+	tf.keras.preprocessing.image.save_img('output' + str(x) + '.jpg', output_image)
+
+
+output_frames = []
+for stylized_image in stylized_frames:
+	output_image = tf.squeeze(stylized_image).numpy()
+	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+	plt.imshow(output_image)
+	plt.show()
+	output_frames.append(output_image)
+
+print("output_frames length")
+print(len(output_frames))
+
+write_video(output_frames, 2.778, "./../data/content/video/test.mp4")
+
+# !! COMMENTED #
+
+# content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+# style_path = 
+
+# content = preprocess_image(content_path)
+# style = preprocess_image(style_path)
+# stylized = initialize_stylized()
+# stylize_frame(content, style, stylized)
+
 
 # Uncomment this if running in Colab:
 # from google.colab import files
