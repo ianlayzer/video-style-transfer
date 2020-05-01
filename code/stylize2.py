@@ -4,7 +4,6 @@ import hyperparameters as hp
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from moviepy.editor import *
 from cv2 import VideoWriter, VideoWriter_fourcc
 
 # refactored functions to work with both images and video
