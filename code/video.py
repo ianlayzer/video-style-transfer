@@ -7,7 +7,7 @@ import numpy as np
 frames_list = []
 cap = cv2.VideoCapture('./../data/content/video/tomjerry.mp4')
 i = 0
-frame_skip = 150
+frame_skip = 10
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -15,8 +15,8 @@ while cap.isOpened():
     if i > frame_skip - 1:
         # cv2.imwrite('test_'+str(i)+'.jpg', frame)
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        plt.imshow(frame)
-        plt.show()
+        # plt.imshow(frame)
+        # plt.show()
         frames_list.append(frame)
         i = 0
         continue
@@ -28,8 +28,8 @@ num_frames = len(frames_list)
 print(num_frames)
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-# fps = 30.78*num_frames/277
-fps = 1
+fps = 30.78*num_frames/277
+# fps = 1
 print(fps)
 video = VideoWriter('./../data/content/video/test.mp4', fourcc, fps, (640, 360))
 for frame in frames_list:
