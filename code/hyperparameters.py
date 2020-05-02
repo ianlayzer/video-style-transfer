@@ -1,7 +1,7 @@
 # weights for content and style loss (α, β, γ in Ruder et al.)
 # content_loss_weight = 30000
 content_loss_weight = 10000
-style_loss_weight = 0.03
+style_loss_weight = 0.01
 temporal_loss_weight = 1
 
 # img dimensions

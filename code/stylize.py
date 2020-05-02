@@ -15,7 +15,7 @@ style_layers = [2, 5, 8, 13, 18]
 
 model = make_vgg(image_height, image_width)
 
-def prCyan(skk): print("\033[96m {}\033[00m" .format(skk))
+def prCyan(skk): print("\033[96m{}\033[00m" .format(skk))
 
 def preprocess_image(image_path):
 	image = tf.io.read_file(image_path)
@@ -96,7 +96,7 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 			content_loss, style_loss = get_total_loss(content_feature_maps, style_feature_grams, stylized_content_features, stylized_style_feature_grams, flow)
 			loss = content_loss + style_loss
 		if e % 100 == 0:
-			print("Epoch " + str(e) + ": Content Loss = " + str(content_loss.numpy()) + ", Style Loss = " + str(style_loss.numpy()))
+			print("Epoch " + str(e) + ": Content Loss = " + str(content_loss.numpy()) + " Style Loss = " + str(style_loss.numpy()))
 		# calculate gradient of loss with respect to the stylized image (a variable)
 		grad = tape.gradient(loss, stylized)
 		# Applies this gradient to the image
