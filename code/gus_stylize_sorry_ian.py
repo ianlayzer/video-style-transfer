@@ -15,7 +15,6 @@ style_layers = [2, 5, 8, 13, 18]
 
 model = make_vgg(image_height, image_width)
 
-def prCyan(skk): print("\033[96m{}\033[00m" .format(skk))
 
 def preprocess_image(image_path):
 	image = tf.io.read_file(image_path)
@@ -93,10 +92,9 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 			stylized_content_features = compute_all_feature_maps(stylized, content_layers)
 			stylized_style_feature_grams = features_to_grams(compute_all_feature_maps(stylized, style_layers))
 			# calculate loss
-			content_loss, style_loss = get_total_loss(content_feature_maps, style_feature_grams, stylized_content_features, stylized_style_feature_grams, flow)
-			loss = content_loss + style_loss
+			loss = get_total_loss(content_feature_maps, style_feature_grams, stylized_content_features, stylized_style_feature_grams, flow)
 		if e % 100 == 0:
-			print("Epoch " + str(e) + ": Content Loss = " + str(content_loss.numpy()) + " Style Loss = " + str(style_loss.numpy()))
+			print("Epoch " + str(e) + " Loss: " + str(loss.numpy()))
 		# calculate gradient of loss with respect to the stylized image (a variable)
 		grad = tape.gradient(loss, stylized)
 		# Applies this gradient to the image
@@ -147,14 +145,12 @@ def get_total_loss(content_features, style_feature_grams, stylized_content_featu
 					weights_mask=None, flow=None):
 	content_loss = layered_mean_squared_error(content_features, stylized_content_features)
 	style_loss = layered_mean_squared_error(style_feature_grams, stylized_style_feature_grams)
-
-	content_loss *= hp.content_loss_weight
-	style_loss *= hp.style_loss_weight
+	total_loss = hp.content_loss_weight * content_loss + hp.style_loss_weight * style_loss
 	# add temporal loss if applicable
-	# if use_temporal_loss:
-	# 	temporal_loss = get_temporal_loss(previous_stylized, stylized, weights_mask, flow)
-	# 	total_loss += hp.temporal_loss_weight * temporal_loss
-	return content_loss, style_loss
+	if use_temporal_loss:
+		temporal_loss = get_temporal_loss(previous_stylized, stylized, weights_mask, flow)
+		total_loss += hp.temporal_loss_weight * temporal_loss
+	return total_loss
 
 def layered_mean_squared_error(source_features, generated_features):
 	total_loss = tf.constant(0.0)
@@ -259,7 +255,7 @@ def stylize_video(video_name, style_path, fps):
 	stylized_frame_list = []
 	# stylize every frame
 	for f in range(len(frame_list)):
-		prCyan("Stylizing Frame " + str(f+1))
+		print("- Stylizing Frame " + str(f+1))
 		# content target for this frame style transfer
 		content = frame_list[f]
 		# stylize img
@@ -293,7 +289,7 @@ def preprocess_video(video_name):
 		i += 1
 
 	video.release()
-	prCyan("- Stylizing " + str(len(frame_list)) + " frames - ")
+	print("- Stylizing " + str(len(frame_list)) + " frames")
 	return frame_list
 
 # writes a list of numpy array frames to a video
@@ -305,32 +301,31 @@ def write_video(frames, fps, filename):
 	video.release()
 
 video = "tomjerry.mp4"
-# style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
-style_path = tf.keras.utils.get_file('kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
+style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
 
-# content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-# stylize_image(content_path, style_path)
+content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+stylize_image(content_path, style_path)
 
 
 # !! COMMENTED #
 
-stylized_frames = stylize_video(video, style_path, 24)
+# stylized_frames = stylize_video(video, style_path, 24)
 
-for x in range (len(stylized_frames)):
-	output_image = stylized_frames[x]
-	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
-	tf.keras.preprocessing.image.save_img('StylizedFrame' + str(x) + '.jpg', output_image)
+# for x in range (len(stylized_frames)):
+# 	output_image = stylized_frames[x]
+# 	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
+# 	tf.keras.preprocessing.image.save_img('StylizedFrame' + str(x) + '.jpg', output_image)
 
 
-output_frames = []
-for stylized_image in stylized_frames:
-	output_image = tf.squeeze(stylized_image).numpy()
-	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-	plt.imshow(output_image)
-	plt.show()
-	output_frames.append(output_image)
+# output_frames = []
+# for stylized_image in stylized_frames:
+# 	output_image = tf.squeeze(stylized_image).numpy()
+# 	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+# 	plt.imshow(output_image)
+# 	plt.show()
+# 	output_frames.append(output_image)
 
-write_video(output_frames, 2.778, "./../data/content/video/test.mp4")
+# write_video(output_frames, 2.778, "./../data/content/video/test.mp4")
 
 # !! COMMENTED #
 
