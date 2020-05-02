@@ -7,7 +7,7 @@ import numpy as np
 frames_list = []
 cap = cv2.VideoCapture('./../data/content/video/tomjerry.mp4')
 i = 0
-frame_skip = 100
+frame_skip = 150
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
