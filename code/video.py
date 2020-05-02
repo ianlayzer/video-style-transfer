@@ -15,8 +15,8 @@ while cap.isOpened():
     if i > frame_skip - 1:
         # cv2.imwrite('test_'+str(i)+'.jpg', frame)
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # plt.imshow(frame)
-        # plt.show()
+        plt.imshow(frame)
+        plt.show()
         frames_list.append(frame)
         i = 0
         continue

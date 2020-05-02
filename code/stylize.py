@@ -305,32 +305,32 @@ def write_video(frames, fps, filename):
 	video.release()
 
 video = "tomjerry.mp4"
-# style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
-style_path = tf.keras.utils.get_file('kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
+style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
+# style_path = tf.keras.utils.get_file('kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
 
-# content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-# stylize_image(content_path, style_path)
+content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+stylize_image(content_path, style_path)
 
 
 # !! COMMENTED #
 
-stylized_frames = stylize_video(video, style_path, 24)
+# stylized_frames = stylize_video(video, style_path, 24)
 
-for x in range (len(stylized_frames)):
-	output_image = stylized_frames[x]
-	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
-	tf.keras.preprocessing.image.save_img('StylizedFrame' + str(x) + '.jpg', output_image)
+# for x in range (len(stylized_frames)):
+# 	output_image = stylized_frames[x]
+# 	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
+# 	tf.keras.preprocessing.image.save_img('StylizedFrame' + str(x) + '.jpg', output_image)
 
 
-output_frames = []
-for stylized_image in stylized_frames:
-	output_image = tf.squeeze(stylized_image).numpy()
-	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-	plt.imshow(output_image)
-	plt.show()
-	output_frames.append(output_image)
+# output_frames = []
+# for stylized_image in stylized_frames:
+# 	output_image = tf.squeeze(stylized_image).numpy()
+# 	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+# 	plt.imshow(output_image)
+# 	plt.show()
+# 	output_frames.append(output_image)
 
-write_video(output_frames, 1, "./../data/content/video/test.mp4")
+# write_video(output_frames, 1, "./../data/content/video/test.mp4")
 
 # !! COMMENTED #
 
