@@ -54,13 +54,21 @@ def write_video(frames, fps, filename):
 	video.release()
 
 # makes a filename for an image
-def make_filename(content_path, style_path, file_type, fps=None):
+def make_filename(content_path, 
+                    style_path, 
+                    file_type,
+                    content_loss_weight=hp.content_loss_weight,
+                    style_loss_weight=hp.style_loss_weight,
+                    temporal_loss_weight=hp.temporal_loss_weight,
+                    learning_rate=hp.learning_rate,
+                    num_epochs=hp.num_epochs,
+                    fps=None):
 	content_name = get_filename_from_path(content_path)
 	style_name = get_filename_from_path(style_path)
 
-	name = content_name + "-" + style_name + "-" + "c_w" + str(hp.content_loss_weight) \
-		+ "-s_w" + str(hp.style_loss_weight) + "-t_w" + str(hp.temporal_loss_weight) \
-			+ "-l_r" + str(hp.learning_rate)
+	name = content_name + "-" + style_name + "-" + "c_w" + str(content_loss_weight) \
+		+ "-s_w" + str(style_loss_weight) + "-t_w" + str(temporal_loss_weight) \
+			+ "-e" + str(num_epochs) + "-l_r" + str(learning_rate)
 	# optional parameters for video
 	if fps is not None:
 		name += "-fps" + str(fps)
