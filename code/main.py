@@ -56,10 +56,6 @@ def main():
     if ARGS.image:
         stylize_image(content_path, style_path)
     
-        
-    
-    
-
 
 #image vs. video, style, content, temporal loss (none, short, both)
 #global arguments

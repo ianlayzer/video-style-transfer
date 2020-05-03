@@ -82,30 +82,32 @@ def stylize_video(video_path,
 		curr_content = frame_list[f]
 		# stylize img
 		if f < 2:
-			stylized = stylize_frame(content=curr_content,
+			stylized = stylize_frame(curr_content=curr_content,
 									prev_content=curr_content,
 									prev_prev_content=curr_content, 
 									style=style, 
-									initial_stylized=prev_style, 
+									prev_stylized=prev_style, 
 									use_temporal_loss=False,
 									precomputed_style_grams=style_feature_grams,
 									content_loss_weight=content_loss_weight,
 									style_loss_weight=style_loss_weight,
 									temporal_loss_weight=temporal_loss_weight,
+									learning_rate=hp.learning_rate,
 									num_epochs=num_epochs)
 		else:
 			prev_content = frame_list[f-1]
 			prev_prev_content = frame_list[f-2]
-			stylized = stylize_frame(content=curr_content,
+			stylized = stylize_frame(curr_content=curr_content,
 									prev_content=prev_content,
 									prev_prev_content=prev_prev_content, 
 									style=style, 
-									initial_stylized=prev_style, 
+									prev_stylized=prev_style, 
 									use_temporal_loss=True,
 									precomputed_style_grams=style_feature_grams,
 									content_loss_weight=content_loss_weight,
 									style_loss_weight=style_loss_weight,
 									temporal_loss_weight=temporal_loss_weight,
+									learning_rate=hp.learning_rate,
 									num_epochs=num_epochs)
 		# add to stylized frame list
 		to_append = tf.identity(stylized)
@@ -172,7 +174,7 @@ def stylize_frame(curr_content,
 	# previous_stylized = tf.identity(initial_stylized)
 	# TODO: temporal weights mask
 	flow = []
-	weights_mask = []
+	disocclusion_mask = []
 	if use_temporal_loss:
 		disocclusion_mask = compute_disocclusion_mask(prev_prev_content, prev_content, curr_content)
 		flow = get_flow_vectors(prev_content, curr_content)
