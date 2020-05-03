@@ -10,6 +10,8 @@ from cv2 import VideoWriter, VideoWriter_fourcc
 image_height = hp.img_height
 image_width = hp.img_width
 
+num_epochs = hp.num_epochs
+
 content_layers = [14]
 style_layers = [2, 5, 8, 13, 18]
 
@@ -42,7 +44,7 @@ def initialize_stylized():
 	output_stylized_img = tf.Variable(output_stylized_img)
 	return output_stylized_img
 
-def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None, use_temporal_loss=False, frames=None,  num_epochs=1000):
+def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None, use_temporal_loss=False, frames=None,  num_epochs=num_epochs):
 	"""Generates a stylized still image frame using the content from content, the
 	style from style. The stylized image is initialized as the inputted stylized image.
 	We can also pass in stylized feature maps rather than a stylized image, in which
