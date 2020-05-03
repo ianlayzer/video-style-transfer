@@ -252,7 +252,7 @@ def stylize_image(content_path, style_path):
 	tf.keras.preprocessing.image.save_img('output.jpg', output_image)
 
 
-def stylize_video(video_name, style_path, fps, name_to_write):
+def stylize_video(video_name, style_path, fps, filepath_destination):
 	# get preprocessed frame list
 	frame_list = preprocess_video(video_name)
 
@@ -291,13 +291,12 @@ def stylize_video(video_name, style_path, fps, name_to_write):
 		plt.show()
 		output_frames.append(output_image)
 	# write video
-	filepath_destination = "./../data/output/video/" + name_to_write
 	write_video(output_frames, fps, filepath_destination)
 
 
-def preprocess_video(video_name):
+def preprocess_video(video_path):
 	frame_list = []
-	video = cv2.VideoCapture("./../data/content/video/" + video_name)
+	video = cv2.VideoCapture(video_path)
 	i = 0
     # a variable to set how many frames you want to skip
 	frame_skip = 100
@@ -324,47 +323,38 @@ def write_video(frames, fps, filename):
 		video.write(frame)
 	video.release()
 
-video = "tomjerry.mp4"
-style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
-# style_path = tf.keras.utils.get_file('kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
+# makes a filename for an image
+def make_filename(content_path, style_path, file_type, fps=None):
+	content_name = get_filename_from_path(content_path)
+	style_name = get_filename_from_path(style_path)
 
-# content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
+	name = content_name + "-" + style_name + "-" + "c_w" + str(hp.content_loss_weight) \
+		+ "-s_w" + str(hp.style_loss_weight) + "-t_w" + str(hp.temporal_loss_weight) \
+			+ "-l_r" + str(hp.learning_rate)
+	# optional parameters for video
+	if fps is not None:
+		name += "-fps" + str(fps)
+
+	name += file_type
+	return name
+
+
+# gets the name of a file from a path
+def get_filename_from_path(path):
+	split_path = path.split("/")
+	file = split_path[len(split_path) - 1]
+	split_file = file.split(".")
+	return split_file[0]
+
+
+
+# video = "tomjerry.mp4"
+# style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
+# # style_path = tf.keras.utils.get_file('kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
+
+# # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 
 content_path = "./../data/content/images/Labrador.jpg"
 style_path = "./../data/style/Starry_Night.jpg"
 
 stylize_image(content_path, style_path)
-
-
-# !! COMMENTED #
-
-# stylized_frames = stylize_video(video, style_path, 24)
-
-# for x in range (len(stylized_frames)):
-# 	output_image = stylized_frames[x]
-# 	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
-# 	tf.keras.preprocessing.image.save_img('StylizedFrame' + str(x) + '.jpg', output_image)
-
-
-# output_frames = []
-# for stylized_image in stylized_frames:
-# 	output_image = tf.squeeze(stylized_image).numpy()
-# 	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-# 	plt.imshow(output_image)
-# 	plt.show()
-# 	output_frames.append(output_image)
-
-# write_video(output_frames, 1, "./../data/content/video/test.mp4")
-
-# !! COMMENTED #
-
-
-# content = preprocess_image(content_path)
-# style = preprocess_image(style_path)
-# stylized = initialize_stylized()
-# stylize_frame(content, style, stylized)
-
-
-# Uncomment this if running in Colab:
-# from google.colab import files
-# files.download('output.jpg')
