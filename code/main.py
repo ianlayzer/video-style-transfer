@@ -3,7 +3,7 @@ import os
 import argparse
 import tensorflow as tf
 import hyperparameters as hp
-from img_stylize import stylize_image
+from stylize import stylize_image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -54,7 +54,13 @@ def main():
     style_path = data_folder + ARGS.style
     #calling img_stylize or vid_stylize to stylize the content
     if ARGS.image:
+        print(True)
         stylize_image(content_path, style_path)
+    if ARGS.video:
+        print(False)
+        #idk what the actual video func is called
+        #stylize_video(content_path, style_path)
+        
     
         
     
