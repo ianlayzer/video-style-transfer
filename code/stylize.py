@@ -15,6 +15,8 @@ num_epochs = hp.num_epochs
 content_layers = [14]
 style_layers = [2, 5, 8, 13, 18]
 
+style_layer_weights = hp.style_layer_weights
+
 model = make_vgg(image_height, image_width)
 
 def prCyan(skk): print("\033[96m{}\033[00m" .format(skk))
@@ -167,7 +169,7 @@ def layered_mean_squared_error(source_features, generated_features):
 	total_loss = tf.constant(0.0)
 	for i in range(len(source_features)):
 		layer_loss = tf.keras.losses.MeanSquaredError()(source_features[i], generated_features[i])
-		total_loss += layer_loss
+		total_loss += layer_loss * style_layer_weights[i]
 	return total_loss
 
 
