@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from cv2 import VideoWriter, VideoWriter_fourcc
 from processing import *
+from temporal import *
 
 # refactored functions to work with both images and video
 image_height = hp.img_height
@@ -20,14 +21,93 @@ style_layer_weights = hp.style_layer_weights
 
 model = make_vgg(image_height, image_width)
 
-def initialize_stylized():
-	# Output stylized image
-	output_stylized_img = tf.random.normal((1, image_height, image_width, 3), mean=0.5)
-	output_stylized_img = tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0)
-	output_stylized_img = tf.Variable(output_stylized_img)
-	return output_stylized_img
 
-def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None, use_temporal_loss=False, frames=None,  num_epochs=num_epochs):
+def stylize_image(content_path, 
+					style_path, 
+					content_loss_weight=hp.content_loss_weight,
+					style_loss_weight=hp.style_loss_weight,
+					temporal_loss_weight=hp.temporal_loss_weight,
+					num_epochs=hp.num_epochs):
+	content = preprocess_image(content_path)
+	style = preprocess_image(style_path)
+	stylized = initialize_stylized()
+	# stylized = tf.Variable(tf.identity(content))
+	output_image = stylize_frame(content, style, stylized, num_epochs=num_epochs)
+
+	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
+
+	name = "./../data/output/images/"
+	name += make_filename(content_path, style_path, ".jpg")
+	tf.keras.preprocessing.image.save_img(name, output_image)
+
+
+def stylize_video(video_path, 
+					style_path, 
+					fps, 
+					content_loss_weight=hp.content_loss_weight,
+					style_loss_weight=hp.style_loss_weight,
+					temporal_loss_weight=hp.temporal_loss_weight,
+					num_epochs=hp.num_epochs):
+	# get preprocessed frame list
+	frame_list = preprocess_video(video_path)
+
+	# preprocess style image
+	style = preprocess_image(style_path)
+
+	# precompute style image feature response
+	style_feature_grams = features_to_grams(compute_all_feature_maps(style, style_layers))
+
+
+	# starts uninitialized because there is no previous stylized frame at beginning
+	previous = initialize_stylized()
+	# list to add stylized frames to
+	stylized_frame_list = []
+	# stylize every frame
+	for f in range(len(frame_list)):
+		prCyan("Stylizing Frame " + str(f+1))
+		# content target for this frame style transfer
+		content = frame_list[f]
+		# stylize img
+		stylized = stylize_frame(content=content, 
+								style=style, 
+								initial_stylized=previous, 
+								precomputed_style_grams=style_feature_grams,
+								use_temporal_loss=False,
+								frames=None,
+								content_loss_weight=content_loss_weight,
+								style_loss_weight=style_loss_weight,
+								temporal_loss_weight=temporal_loss_weight,
+								num_epochs=num_epochs)
+		# add to stylized frame list
+		to_append = tf.identity(stylized)
+		stylized_frame_list.append(to_append)
+
+		# update previous stylized frame to the frame we just stylized with optical flow applied
+		previous = stylized
+		# TODO: MAKE THIS WORK f, f+1, just numbers
+		# initial_stylized = apply_optical_flow(f, f+1, stylized)
+	output_frames = []
+	for stylized_image in stylized_frame_list:
+		output_image = tf.squeeze(stylized_image).numpy()
+		output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+		# plt.imshow(output_image)
+		# plt.show()
+		output_frames.append(output_image)
+	# write video
+	output_filepath = "./../data/output/video/"
+	output_filepath += make_filename(video_path, style_path, ".mp4", fps)
+	write_video(output_frames, fps, output_filepath)
+
+def stylize_frame(content, 
+					style, 
+					initial_stylized, 
+					precomputed_style_grams=None, 
+					use_temporal_loss=False, 
+					frames=None,  
+					content_loss_weight=hp.content_loss_weight,
+					style_loss_weight=hp.style_loss_weight,
+					temporal_loss_weight=hp.temporal_loss_weight,
+					num_epochs=num_epochs):
 	"""Generates a stylized still image frame using the content from content, the
 	style from style. The stylized image is initialized as the inputted stylized image.
 	We can also pass in stylized feature maps rather than a stylized image, in which
@@ -94,6 +174,13 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 	# return to be used as initial stylized for next frame
 	return stylized
 
+def initialize_stylized():
+	# Output stylized image
+	output_stylized_img = tf.random.normal((1, image_height, image_width, 3), mean=0.5)
+	output_stylized_img = tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0)
+	output_stylized_img = tf.Variable(output_stylized_img)
+	return output_stylized_img
+
 # computes list of feature map responses by passing image through network
 # up until each layer in layers
 def compute_all_feature_maps(image, layers):
@@ -156,39 +243,6 @@ def layered_mean_squared_error(source_features, generated_features):
 		total_loss += layer_loss * style_layer_weights[i]
 	return total_loss
 
-
-# TEMPORAL STUFF
-
-def compute_disocclusion_mask(prev_frame, curr_frame, next_frame):
-	# TODO: implement weights matrix where value is 0 if pixel is disoccluded and
-	# 1 otherwise?
-
-	forward_flow = get_flow_vectors(prev_frame, curr_frame)
-	backward_flow = get_flow_vectors(next_frame, curr_frame)
-
-	# forward_warp = apply_optical_flow(forward_flow, prev_frame)
-	# backward_warp = apply_optical_flow(backward_flow, next_frame)
-
-	cancel_flow = forward_flow+backward_flow
-
-	LHS = cancel_flow[:,:,0]**2 + cancel_flow[:,:,1]**2
-
-	w_squigly_2 = forward_flow[:,:,0]**2 + forward_flow[:,:,1]**2
-	w_hat_2 = backward_flow[:,:,0]**2 + backward_flow[:,:,1]**2
-
-	RHS = .001 * (w_hat_2 + w_squigly_2) +.5
-
-	mask = LHS <= RHS
-
-	#Not using boolean mask rn because it is shit with Farneback optical flow
-	mask.fill(1)
-
-	mask = tf.convert_to_tensor(mask, dtype=bool)
-
-	return mask
-
-
-
 def get_temporal_loss(previous_stylized, current_stylized, weights_mask, flow):
 	
 	# TODO: implement temporal loss between 
@@ -198,85 +252,3 @@ def get_temporal_loss(previous_stylized, current_stylized, weights_mask, flow):
 	loss = tf.where(weights_mask, (current_stylized-warped_style_curr)**2, 0)
 
 	return tf.reduce_mean(loss)
-
-def get_flow_vectors(frame_1, frame_2):
-
-	#TODO: implement Gunner Farneback algorithm using OpenCV
-
-	frame_1 = cv2.cvtColor(frame_1,cv2.COLOR_RGB2GRAY)
-	frame_2 = cv2.cvtColor(frame_2,cv2.COLOR_RGB2GRAY)
-
-	#Calculate Flow
-	flow = cv2.calcOpticalFlowFarneback(frame_1,frame_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-
-	return flow
-
-
-def apply_optical_flow(flow, stylized_frame):
-
-	# TODO: apply optical flow from frame to next frame onto stylized frame
-	img = stylized_frame.numpy()
-	h, w = flow.shape[:2]
-	flow = -flow
-	flow[:,:,0] += np.arange(w)
-	flow[:,:,1] += np.arange(h)[:,np.newaxis]
-	res = cv2.remap(img, flow, None, cv2.INTER_LINEAR)
-
-	return tf.convert_to_tensor(res)
-
-
-def stylize_image(content_path, style_path, num_epochs=hp.num_epochs):
-	content = preprocess_image(content_path)
-	style = preprocess_image(style_path)
-	stylized = initialize_stylized()
-	# stylized = tf.Variable(tf.identity(content))
-	output_image = stylize_frame(content, style, stylized, num_epochs=num_epochs)
-
-	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
-
-	name = "./../data/output/images/"
-	name += make_filename(content_path, style_path, ".jpg")
-	tf.keras.preprocessing.image.save_img(name, output_image)
-
-
-def stylize_video(video_path, style_path, fps, num_epochs=hp.num_epochs):
-	# get preprocessed frame list
-	frame_list = preprocess_video(video_path)
-
-	# preprocess style image
-	style = preprocess_image(style_path)
-
-	# precompute style image feature response
-	style_feature_grams = features_to_grams(compute_all_feature_maps(style, style_layers))
-
-
-	# starts uninitialized because there is no previous stylized frame at beginning
-	previous = initialize_stylized()
-	# list to add stylized frames to
-	stylized_frame_list = []
-	# stylize every frame
-	for f in range(len(frame_list)):
-		prCyan("Stylizing Frame " + str(f+1))
-		# content target for this frame style transfer
-		content = frame_list[f]
-		# stylize img
-		stylized = stylize_frame(content, style, previous, style_feature_grams, num_epochs=num_epochs)
-		# add to stylized frame list
-		to_append = tf.identity(stylized)
-		stylized_frame_list.append(to_append)
-
-		# update previous stylized frame to the frame we just stylized with optical flow applied
-		previous = stylized
-		# TODO: MAKE THIS WORK f, f+1, just numbers
-		# initial_stylized = apply_optical_flow(f, f+1, stylized)
-	output_frames = []
-	for stylized_image in stylized_frame_list:
-		output_image = tf.squeeze(stylized_image).numpy()
-		output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-		# plt.imshow(output_image)
-		# plt.show()
-		output_frames.append(output_image)
-	# write video
-	output_filepath = "./../data/output/video/"
-	output_filepath += make_filename(video_path, style_path, ".mp4", fps)
-	write_video(output_frames, fps, output_filepath)
