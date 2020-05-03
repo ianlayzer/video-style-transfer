@@ -103,6 +103,11 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 		optimizer.apply_gradients([(grad, stylized)])
 		# Clips image from 0-1, assigns gradient applied image to image variable
 		stylized.assign(tf.clip_by_value(stylized, clip_value_min=0.0, clip_value_max=1.0))
+		
+		if e % 100 == 0 and e != 0:
+			output_image = tf.reverse(tf.squeeze(stylized), axis=[-1]).numpy()
+			tf.keras.preprocessing.image.save_img('epoch' + str(e) + '.jpg', output_image)
+
 	# return to be used as initial stylized for next frame
 	return stylized
 
