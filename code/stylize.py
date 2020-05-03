@@ -143,7 +143,7 @@ def compute_feature_map_gram(feature_map):
 	depth = feature_map.shape[3]
 	b = tf.reshape(tf.squeeze(feature_map) , [-1, depth])
 	a = tf.transpose(b)
-	return tf.linalg.matmul(a, b)
+	return tf.linalg.matmul(a, b) / b.size
 
 
 # Gets content loss, style loss, then multiplies them by corresponding weights to get total loss
@@ -250,7 +250,7 @@ def stylize_image(content_path, style_path):
 	tf.keras.preprocessing.image.save_img('output.jpg', output_image)
 
 
-def stylize_video(video_name, style_path, fps):
+def stylize_video(video_name, style_path, fps, name_to_write):
 	# get preprocessed frame list
 	frame_list = preprocess_video(video_name)
 
@@ -281,7 +281,17 @@ def stylize_video(video_name, style_path, fps):
 		# TODO: MAKE THIS WORK f, f+1, just numbers
 		# initial_stylized = apply_optical_flow(f, f+1, stylized)
 
-	return stylized_frame_list
+	output_frames = []
+	for stylized_image in stylized_frame_list:
+		output_image = tf.squeeze(stylized_image).numpy()
+		output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+		plt.imshow(output_image)
+		plt.show()
+		output_frames.append(output_image)
+	# write video
+	filepath_destination = "./../data/output/video/" + name_to_write
+	write_video(output_frames, fps, filepath_destination)
+
 
 def preprocess_video(video_name):
 	frame_list = []
