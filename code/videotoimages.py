@@ -153,7 +153,7 @@ def get_temporal_loss(previous_stylized, previous_content, current_content, curr
 
 def get_flow_vectors(frame_1, frame_2):
 
-	
+
 
 	#TODO: implement Gunner Farneback algorithm using OpenCV
 
