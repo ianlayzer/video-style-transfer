@@ -6,10 +6,14 @@ style_loss_weight = 0.01
 temporal_loss_weight = 1
 
 # img dimensions
-img_height = 168
-img_width = 299
+img_height = 558
+img_width = 700
 # img_height = 224
 # img_width = 224
+
+# layer weights for style loss assuming 5 style layers
+
+style_layer_weights = [5, 0, 0, 0, 0]
 
 # learning rate for gradient descent
 learning_rate = 0.04

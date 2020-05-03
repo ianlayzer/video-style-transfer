@@ -15,6 +15,8 @@ style_layers = [2, 5, 8, 13, 18]
 
 model = make_vgg(image_height, image_width)
 
+style_layer_weights = hp.style_layer_weights
+
 
 def preprocess_image(image_path):
 	image = tf.io.read_file(image_path)
@@ -156,7 +158,7 @@ def layered_mean_squared_error(source_features, generated_features):
 	total_loss = tf.constant(0.0)
 	for i in range(len(source_features)):
 		layer_loss = tf.keras.losses.MeanSquaredError()(source_features[i], generated_features[i])
-		total_loss += layer_loss
+		total_loss += layer_loss * style_layer_weights[i]
 	return total_loss
 
 
