@@ -344,8 +344,8 @@ style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQ
 
 # !! COMMENTED #
 
-content_path = "./../data/content/images/Labrador.jpg"
-style_path = "./../data/style/Starry_Night.jpg"
+content_path = "../data/content/images/Labrador.jpg"
+style_path = "../data/style/Starry_Night.jpg"
 
 content = preprocess_image(content_path)
 style = preprocess_image(style_path)
