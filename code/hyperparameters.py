@@ -17,7 +17,7 @@ style_layer_weights = [5, 0, 0, 0, 0]
 
 # learning rate for gradient descent
 # learning_rate = 0.04
-learning_rate = 0.04
+learning_rate = 0.03
 
 # number of iterations for gradient descent
 num_epochs = 600
