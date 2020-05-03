@@ -7,7 +7,7 @@ temporal_loss_weight = 1
 img_height = 558
 img_width = 700
 # layer weights for style loss assuming 5 style layers
-style_layer_weights = [1, 0, 0, 2, 2000]
+style_layer_weights = [1, 0, 0, 2000, 20000000]
 
 # learning rate for gradient descent
 learning_rate = 0.04
