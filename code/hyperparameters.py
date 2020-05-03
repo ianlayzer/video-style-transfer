@@ -2,7 +2,7 @@
 # content_loss_weight = 30000
 content_loss_weight = 10000
 # style_loss_weight = 0.03
-style_loss_weight = 0.05
+style_loss_weight = 0.1
 temporal_loss_weight = 1
 
 # img dimensions
