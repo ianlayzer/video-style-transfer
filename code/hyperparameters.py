@@ -4,8 +4,8 @@ content_loss_weight = 400000
 style_loss_weight = .0001
 temporal_loss_weight = 1
 # img dimensions
-img_height = 558
-img_width = 700
+img_height = 200
+img_width = 200
 # layer weights for style loss assuming 5 style layers
 style_layer_weights = [1, 10, 100, 100, 1000]
 

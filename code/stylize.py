@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from cv2 import VideoWriter, VideoWriter_fourcc
+from processing import *
 
 # refactored functions to work with both images and video
 image_height = hp.img_height
@@ -18,26 +19,6 @@ style_layers = [2, 5, 8, 13, 18]
 style_layer_weights = hp.style_layer_weights
 
 model = make_vgg(image_height, image_width)
-
-def prCyan(skk): print("\033[96m{}\033[00m" .format(skk))
-
-def preprocess_image(image_path):
-	image = tf.io.read_file(image_path)
-	image = tf.image.decode_image(image, channels=3, dtype=tf.float32)
-	return preprocess_helper(image)
-
-def preprocess_frame(frame):
-	frame = tf.convert_to_tensor(frame, dtype=tf.uint8)
-	frame = tf.image.convert_image_dtype(frame, tf.float32)
-	return preprocess_helper(frame)
-
-def preprocess_helper(image):
-	image = tf.image.resize(image, (image_height, image_width), antialias=True)
-	image = tf.image.convert_image_dtype(image, tf.uint8)
-	image = tf.expand_dims(image, 0)
-	image = tf.keras.applications.imagenet_utils.preprocess_input(image)
-	image = tf.image.convert_image_dtype(image, tf.float32)
-	return image
 
 def initialize_stylized():
 	# Output stylized image
@@ -71,7 +52,6 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 	"""
 	# the previous stylized frame
 	# previous_stylized = tf.identity(initial_stylized)
-
 	# TODO: temporal weights mask
 	flow = []
 	weights_mask = []
@@ -86,7 +66,6 @@ def stylize_frame(content, style, initial_stylized, precomputed_style_grams=None
 	# check if we need to compute style target style responses now or if already computed
 	if style_feature_grams is None:
 		style_feature_grams = features_to_grams(compute_all_feature_maps(style, style_layers))
-
 	# optimize loss
 	optimizer = tf.optimizers.Adam(learning_rate=hp.learning_rate)
 	# Optimizes images to minimize loss between input content image/input style image and output stylized image
@@ -145,8 +124,13 @@ def compute_feature_map_gram(feature_map):
 	depth = feature_map.shape[3]
 	b = tf.reshape(tf.squeeze(feature_map) , [-1, depth])
 	a = tf.transpose(b)
-	return tf.linalg.matmul(a, b) / b.size
+	
+	# a and b have the same dimensions
+	# both are 2 dimensional, vector length x depth where vector length = width x height of each feature map
+	# since depth is constant regardless of the input image size, we don't really need this value (unless you want it)
+	# so size =
 
+	return tf.linalg.matmul(a, b)
 
 # Gets content loss, style loss, then multiplies them by corresponding weights to get total loss
 # (Weights are different than the paper, but after lots of trial and error these seem to work well)
@@ -241,20 +225,23 @@ def apply_optical_flow(flow, stylized_frame):
 	return tf.convert_to_tensor(res)
 
 
-def stylize_image(content_path, style_path):
+def stylize_image(content_path, style_path, num_epochs=hp.num_epochs):
 	content = preprocess_image(content_path)
 	style = preprocess_image(style_path)
 	stylized = initialize_stylized()
 	# stylized = tf.Variable(tf.identity(content))
-	output_image = stylize_frame(content, style, stylized)
+	output_image = stylize_frame(content, style, stylized, num_epochs=num_epochs)
 
 	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
-	tf.keras.preprocessing.image.save_img('output.jpg', output_image)
+
+	name = "./../data/output/images/"
+	name += make_filename(content_path, style_path, ".jpg")
+	tf.keras.preprocessing.image.save_img(name, output_image)
 
 
-def stylize_video(video_name, style_path, fps, filepath_destination):
+def stylize_video(video_path, style_path, fps, num_epochs=hp.num_epochs):
 	# get preprocessed frame list
-	frame_list = preprocess_video(video_name)
+	frame_list = preprocess_video(video_path)
 
 	# preprocess style image
 	style = preprocess_image(style_path)
@@ -273,7 +260,7 @@ def stylize_video(video_name, style_path, fps, filepath_destination):
 		# content target for this frame style transfer
 		content = frame_list[f]
 		# stylize img
-		stylized = stylize_frame(content, style, previous, style_feature_grams)
+		stylized = stylize_frame(content, style, previous, style_feature_grams, num_epochs=num_epochs)
 		# add to stylized frame list
 		to_append = tf.identity(stylized)
 		stylized_frame_list.append(to_append)
@@ -282,79 +269,14 @@ def stylize_video(video_name, style_path, fps, filepath_destination):
 		previous = stylized
 		# TODO: MAKE THIS WORK f, f+1, just numbers
 		# initial_stylized = apply_optical_flow(f, f+1, stylized)
-
 	output_frames = []
 	for stylized_image in stylized_frame_list:
 		output_image = tf.squeeze(stylized_image).numpy()
 		output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-		plt.imshow(output_image)
-		plt.show()
+		# plt.imshow(output_image)
+		# plt.show()
 		output_frames.append(output_image)
 	# write video
-	write_video(output_frames, fps, filepath_destination)
-
-
-def preprocess_video(video_path):
-	frame_list = []
-	video = cv2.VideoCapture(video_path)
-	i = 0
-    # a variable to set how many frames you want to skip
-	frame_skip = 100
-	while video.isOpened():
-		ret, frame = video.read()
-		if not ret:
-			break
-		if i > frame_skip - 1:
-			frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-			frame_list.append(preprocess_frame(frame))
-			i = 0
-			continue
-		i += 1
-
-	video.release()
-	prCyan("- Stylizing " + str(len(frame_list)) + " frames - ")
-	return frame_list
-
-# writes a list of numpy array frames to a video
-def write_video(frames, fps, filename):
-	fourcc = VideoWriter_fourcc(*'mp4v')
-	video = VideoWriter(filename, fourcc, fps, (image_width, image_height))
-	for frame in frames:
-		video.write(frame)
-	video.release()
-
-# makes a filename for an image
-def make_filename(content_path, style_path, file_type, fps=None):
-	content_name = get_filename_from_path(content_path)
-	style_name = get_filename_from_path(style_path)
-
-	name = content_name + "-" + style_name + "-" + "c_w" + str(hp.content_loss_weight) \
-		+ "-s_w" + str(hp.style_loss_weight) + "-t_w" + str(hp.temporal_loss_weight) \
-			+ "-l_r" + str(hp.learning_rate)
-	# optional parameters for video
-	if fps is not None:
-		name += "-fps" + str(fps)
-
-	name += file_type
-	return name
-
-
-# gets the name of a file from a path
-def get_filename_from_path(path):
-	split_path = path.split("/")
-	file = split_path[len(split_path) - 1]
-	split_file = file.split(".")
-	return split_file[0]
-
-
-
-# video = "tomjerry.mp4"
-# style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQd/606px-Van-Gogh-Starry-Night-Google-Art-Project.jpg')
-# # style_path = tf.keras.utils.get_file('kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
-
-# # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-
-content_path = "./../data/content/images/Labrador.jpg"
-style_path = "./../data/style/Starry_Night.jpg"
-
-stylize_image(content_path, style_path)
+	output_filepath = "./../data/output/video/"
+	output_filepath += make_filename(video_path, style_path, ".mp4", fps)
+	write_video(output_frames, fps, output_filepath)
