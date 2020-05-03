@@ -332,15 +332,15 @@ style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQ
 # 	tf.keras.preprocessing.image.save_img('StylizedFrame' + str(x) + '.jpg', output_image)
 
 
-output_frames = []
-for stylized_image in stylized_frames:
-	output_image = tf.squeeze(stylized_image).numpy()
-	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
-	plt.imshow(output_image)
-	plt.show()
-	output_frames.append(output_image)
+# output_frames = []
+# for stylized_image in stylized_frames:
+# 	output_image = tf.squeeze(stylized_image).numpy()
+# 	output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+# 	plt.imshow(output_image)
+# 	plt.show()
+# 	output_frames.append(output_image)
 
-write_video(output_frames, 1, "./../data/content/video/test.mp4")
+# write_video(output_frames, 1, "./../data/content/video/test.mp4")
 
 # !! COMMENTED #
 
