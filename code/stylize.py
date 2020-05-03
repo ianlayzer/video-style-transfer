@@ -235,7 +235,8 @@ def apply_optical_flow(flow, stylized_frame):
 def stylize_image(content_path, style_path):
 	content = preprocess_image(content_path)
 	style = preprocess_image(style_path)
-	stylized = initialize_stylized()
+	# stylized = initialize_stylized()
+	stylized = tf.identity(content)
 	output_image = stylize_frame(content, style, stylized)
 
 	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
