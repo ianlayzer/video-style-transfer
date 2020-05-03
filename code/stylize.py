@@ -317,7 +317,7 @@ style_path = tf.keras.utils.get_file('Starry_Night.jpg','https://i.ibb.co/LvGcMQ
 # style_path = tf.keras.utils.get_file('kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
 
 # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
-stylize_image(content_path, style_path)
+# stylize_image(content_path, style_path)
 
 
 # !! COMMENTED #
