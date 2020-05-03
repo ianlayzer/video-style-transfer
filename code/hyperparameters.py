@@ -1,15 +1,16 @@
 # weights for content and style loss (α, β, γ in Ruder et al.)
 # content_loss_weight = 30000
 content_loss_weight = 10000
-# style_loss_weight = 0.03
-style_loss_weight = 0.5
+style_loss_weight = 0.03
 temporal_loss_weight = 1
 
 # img dimensions
 # img_height = 558
 # img_width = 700
-img_height = 224
-img_width = 224
+# img_height = 224
+# img_width = 224
+img_height = 168
+img_width = 299
 
 # layer weights for style loss assuming 5 style layers
 
