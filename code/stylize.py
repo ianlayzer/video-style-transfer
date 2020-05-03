@@ -12,8 +12,6 @@ from temporal import *
 image_height = hp.img_height
 image_width = hp.img_width
 
-num_epochs = hp.num_epochs
-
 content_layers = [14]
 style_layers = [2, 5, 8, 13, 18]
 
@@ -27,6 +25,7 @@ def stylize_image(content_path,
 					content_loss_weight=hp.content_loss_weight,
 					style_loss_weight=hp.style_loss_weight,
 					temporal_loss_weight=hp.temporal_loss_weight,
+					learning_rate=hp.learning_rate,
 					num_epochs=hp.num_epochs):
 	content = preprocess_image(content_path)
 	style = preprocess_image(style_path)
@@ -37,7 +36,14 @@ def stylize_image(content_path,
 	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
 
 	name = "./../data/output/images/"
-	name += make_filename(content_path, style_path, ".jpg")
+	name += make_filename(content_path=content_path, 
+							style_path=style_path, 
+							file_type=".jpg",
+							content_loss_weight=content_loss_weight,
+							style_loss_weight=style_loss_weight,
+							temporal_loss_weight=temporal_loss_weight,
+							num_epochs=num_epochs,
+							learning_rate=learning_rate)
 	tf.keras.preprocessing.image.save_img(name, output_image)
 
 
@@ -47,7 +53,8 @@ def stylize_video(video_path,
 					content_loss_weight=hp.content_loss_weight,
 					style_loss_weight=hp.style_loss_weight,
 					temporal_loss_weight=hp.temporal_loss_weight,
-					num_epochs=hp.num_epochs):
+					num_epochs=hp.num_epochs,
+					learning_rate=hp.learning_rate):
 	# get preprocessed frame list
 	frame_list = preprocess_video(video_path)
 
@@ -95,7 +102,15 @@ def stylize_video(video_path,
 		output_frames.append(output_image)
 	# write video
 	output_filepath = "./../data/output/video/"
-	output_filepath += make_filename(video_path, style_path, ".mp4", fps)
+	output_filepath += make_filename(content_path=video_path, 
+										style_path=style_path, 
+										file_type=".mp4", 
+										fps=fps,
+										content_loss_weight=content_loss_weight,
+										style_loss_weight=style_loss_weight,
+										temporal_loss_weight=temporal_loss_weight,
+										learning_rate=learning_rate,
+										num_epochs=num_epochs)
 	write_video(output_frames, fps, output_filepath)
 
 def stylize_frame(content, 
@@ -107,7 +122,8 @@ def stylize_frame(content,
 					content_loss_weight=hp.content_loss_weight,
 					style_loss_weight=hp.style_loss_weight,
 					temporal_loss_weight=hp.temporal_loss_weight,
-					num_epochs=num_epochs):
+					learning_rate=hp.learning_rate,
+					num_epochs=hp.num_epochs):
 	"""Generates a stylized still image frame using the content from content, the
 	style from style. The stylized image is initialized as the inputted stylized image.
 	We can also pass in stylized feature maps rather than a stylized image, in which
@@ -147,7 +163,7 @@ def stylize_frame(content,
 	if style_feature_grams is None:
 		style_feature_grams = features_to_grams(compute_all_feature_maps(style, style_layers))
 	# optimize loss
-	optimizer = tf.optimizers.Adam(learning_rate=hp.learning_rate)
+	optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
 	# Optimizes images to minimize loss between input content image/input style image and output stylized image
 	for e in range(num_epochs):
 		# Watches loss computation (output_stylized_img watched by default since declared as variable)
@@ -222,18 +238,26 @@ def compute_feature_map_gram(feature_map):
 # Gets content loss, style loss, then multiplies them by corresponding weights to get total loss
 # (Weights are different than the paper, but after lots of trial and error these seem to work well)
 #       They might be different due to the different optimizer?
-def get_total_loss(content_features, style_feature_grams, stylized_content_features, 
-					stylized_style_feature_grams, use_temporal_loss=False, previous_stylized=None,
-					weights_mask=None, flow=None):
+def get_total_loss(content_features, 
+					style_feature_grams, 
+					stylized_content_features, 
+					stylized_style_feature_grams, 
+					use_temporal_loss=False, 
+					previous_stylized=None,
+					weights_mask=None, 
+					flow=None,
+					content_loss_weight=hp.content_loss_weight,
+					style_loss_weight=hp.style_loss_weight,
+					temporal_loss_weight=hp.temporal_loss_weight):
 	content_loss = layered_mean_squared_error(content_features, stylized_content_features)
 	style_loss = layered_mean_squared_error(style_feature_grams, stylized_style_feature_grams)
 
-	content_loss *= hp.content_loss_weight
-	style_loss *= hp.style_loss_weight
+	content_loss *= content_loss_weight
+	style_loss *= style_loss_weight
 	# add temporal loss if applicable
 	# if use_temporal_loss:
 	# 	temporal_loss = get_temporal_loss(previous_stylized, stylized, weights_mask, flow)
-	# 	total_loss += hp.temporal_loss_weight * temporal_loss
+	# 	total_loss += temporal_loss_weight * temporal_loss
 	return content_loss, style_loss
 
 def layered_mean_squared_error(source_features, generated_features):
