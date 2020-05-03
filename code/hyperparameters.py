@@ -1,13 +1,13 @@
 # weights for content and style loss (α, β, γ in Ruder et al.)
 # content_loss_weight = 30000
 content_loss_weight = 80000
-style_loss_weight = .001
+style_loss_weight = .003
 temporal_loss_weight = 1
 # img dimensions
 img_height = 558
 img_width = 700
 # layer weights for style loss assuming 5 style layers
-style_layer_weights = [8, 7, 7, 5, 5]
+style_layer_weights = [1, 1, 1, 1, 1]
 
 # learning rate for gradient descent
 learning_rate = 0.04
