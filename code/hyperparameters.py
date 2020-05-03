@@ -5,8 +5,6 @@ style_loss_weight = 0.03
 temporal_loss_weight = 1
 
 # img dimensions
-# img_height = 558
-# img_width = 700
 # img_height = 224
 # img_width = 224
 img_height = 168
