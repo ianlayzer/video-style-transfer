@@ -5,9 +5,9 @@ from moviepy.editor import *
 import numpy as np
 
 frames_list = []
-cap = cv2.VideoCapture('./../data/content/video/tomjerry.mp4')
+cap = cv2.VideoCapture('./../data/content/video/elephant.mp4')
 i = 0
-frame_skip = 100
+frame_skip = 250
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -17,6 +17,7 @@ while cap.isOpened():
         # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # plt.imshow(frame)
         # plt.show()
+        # print(frame.shape)
         frames_list.append(frame)
         i = 0
         continue
@@ -31,7 +32,7 @@ fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 fps = 30.78*num_frames/277
 fps = 1
 print(fps)
-video = VideoWriter('./../data/content/video/test.mp4', fourcc, fps, (640, 360))
+video = VideoWriter('./../data/content/video/test.mp4', fourcc, fps, (1920, 1080))
 for frame in frames_list:
     video.write(frame)
 video.release()
