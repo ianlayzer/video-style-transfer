@@ -13,7 +13,7 @@ def get_flow_vectors(frame_1, frame_2):
 	img_1 = frame_1.numpy()
 	img_2 = frame_2.numpy()
 
-	print(img_1)
+	print(img_1.shape)
 
 	img_1 = cv2.cvtColor(img_1,cv2.COLOR_RGB2GRAY)
 	img_2 = cv2.cvtColor(img_2,cv2.COLOR_RGB2GRAY)
