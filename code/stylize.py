@@ -22,13 +22,13 @@ model = make_vgg(image_height, image_width)
 
 def stylize_image(content_path, 
 					style_path, 
-					content_loss_weight=hp.content_loss_weight,
-					style_loss_weight=hp.style_loss_weight,
-					temporal_loss_weight=hp.temporal_loss_weight,
-					learning_rate=hp.learning_rate,
-					num_epochs=hp.num_epochs):
-	content = preprocess_image(content_path)
-	style = preprocess_image(style_path)
+					content_loss_weight,
+					style_loss_weight,
+					temporal_loss_weight,
+					learning_rate,
+					num_epochs):
+	content = preprocess_image("./../data/content/images/Labrador.jpg")
+	style = preprocess_image("./../data/style/Starry_Night.jpg")
 	stylized = initialize_stylized()
 	# stylized = tf.Variable(tf.identity(content))
 	output_image = stylize_frame(content, style, stylized, num_epochs=num_epochs)
@@ -50,11 +50,11 @@ def stylize_image(content_path,
 def stylize_video(video_path, 
 					style_path, 
 					fps, 
-					content_loss_weight=hp.content_loss_weight,
-					style_loss_weight=hp.style_loss_weight,
-					temporal_loss_weight=hp.temporal_loss_weight,
-					num_epochs=hp.num_epochs,
-					learning_rate=hp.learning_rate):
+					content_loss_weight,
+					style_loss_weight,
+					temporal_loss_weight,
+					num_epochs,
+					learning_rate):
 	# get preprocessed frame list
 	frame_list = preprocess_video(video_path)
 

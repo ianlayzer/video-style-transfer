@@ -28,12 +28,12 @@ def parse_args():
     parser.add_argument(
         '--video',
         required=False,
-        action="store_true",
+        action='store_true',
         help='''are you loading in a video?''')
     parser.add_argument(
         '--image',
         required=False,
-        action="store_true",
+        action='store_true',
         help='''are you loading in an image?''')
     parser.add_argument(
         '--both',
@@ -44,22 +44,64 @@ def parse_args():
         '--short',
         required=False,
         action="store_true",
-        help='enforce short term consistency.')                     
-
+        help='enforce short term consistency.')
+    parser.add_argument(
+        '--num_epochs',
+        required=False,
+        type=int,
+        default=hp.num_epochs,
+        help='hyperparameter number of epochs.')                           
+    parser.add_argument(
+        '--learning_rate',
+        required=False,
+        type=float,
+        default=hp.learning_rate,
+        help='hp learning rate.')       
+    parser.add_argument(
+        '--content_weight',
+        required=False,
+        type=float,
+        default=hp.content_loss_weight,
+        help='adjust content weight (high).')
+    parser.add_argument(
+        '--style_weight',
+        required=False,
+        type=float,
+        default=hp.style_loss_weight,
+        help='adjust style weight (low).')
+    parser.add_argument(
+        '--temporal_weight',
+        required=False,
+        type=float,
+        default=hp.temporal_loss_weight,
+        help='adjust temporal loss weight.')
+    parser.add_argument(
+        '--style',
+        required=False,
+        type=str,
+        default=style_path,
+        help='style file.')
+    parser.add_argument(
+        '--content',
+        required=False,
+        type=str,
+        default=image_path,
+        help='content file.')                                             
     return parser.parse_args()
-
 
 def main():
     #get image paths
     #calling img_stylize or vid_stylize to stylize the content
-    if ARGS.image:
-        print(True)
-        stylize_image(image_path, style_path)
-    if ARGS.video:
-        print(False)
-        stylize_video(video_path, style_path, framerate)
-        #idk what the actual video func is called
-        #stylize_video(content_path, style_path)
+    if (ARGS.content):
+        video_path = ARGS.content
+        image_path = ARGS.content
+    if ARGS.image and not(ARGS.video):
+        print("image style")
+        stylize_image(image_path, ARGS.style, ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.learning_rate, ARGS.num_epochs)
+    if ARGS.video and not(ARGS.image):
+        print("video style") 
+        stylize_video(video_path, ARGS.style, ARGS.fps , ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.num_epochs, ARGS.learning_rate)
+
         
     
         
