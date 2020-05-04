@@ -59,4 +59,4 @@ def compute_disocclusion_mask(prev_frame, curr_frame, next_frame):
 
 	mask = tf.convert_to_tensor(mask, dtype=bool)
 
-	return mask
+	return tf.expand_dims(mask, 0)
