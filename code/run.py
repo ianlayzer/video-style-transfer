@@ -8,4 +8,4 @@ video_path = "./../data/content/video/elephant.mp4"
 content_path = "./../data/content/images/Labrador.jpg"
 style_path = "./../data/style/Starry_Night.jpg"
 
-stylize_video(video_path, style_path, fps=1)
+stylize_image(content_path, style_path, num_epochs=1)
