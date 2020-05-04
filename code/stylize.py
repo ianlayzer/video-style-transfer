@@ -60,7 +60,7 @@ def stylize_video(video_path,
 					style_loss_weight,
 					temporal_loss_weight,
 					num_epochs,
-					learning_rate
+					learning_rate,
 					use_temporal_loss):
 	# get preprocessed frame list
 	frame_list = preprocess_video(video_path)
