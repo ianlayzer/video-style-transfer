@@ -10,6 +10,8 @@ def get_flow_vectors(frame_1, frame_2):
 
 	#TODO: implement Gunner Farneback algorithm using OpenCV
 
+	print(img_1.shape)
+
 	img_1 = frame_1.numpy()
 	img_2 = frame_2.numpy()
 
