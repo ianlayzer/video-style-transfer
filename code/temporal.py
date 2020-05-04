@@ -10,15 +10,6 @@ def get_flow_vectors(frame_1, frame_2):
 
 	#TODO: implement Gunner Farneback algorithm using OpenCV
 
-	img_1 = frame_1.numpy()
-	img_2 = frame_2.numpy()
-
-	if img_1.shape.count() ==4:
-		img_1 = np.reshape(img_1.shape[1], img_1.shape[2], img_1.shape[3])
-
-	if img_2.shape.count() ==4:
-		img_2 = np.reshape(img_2.shape[1], img_2.shape[2], img_2.shape[3])
-
 	img_1 = cv2.cvtColor(img_1,cv2.COLOR_RGB2GRAY)
 	img_2 = cv2.cvtColor(img_2,cv2.COLOR_RGB2GRAY)
 
@@ -29,14 +20,15 @@ def get_flow_vectors(frame_1, frame_2):
 def apply_optical_flow(flow, stylized_frame):
 
 	# TODO: apply optical flow from frame to next frame onto stylized frame
-	img = stylized_frame.numpy()
+	img = tf.squeeze(stylized_frame).numpy()
 	h, w = flow.shape[:2]
 	flow = -flow
 	flow[:,:,0] += np.arange(w)
 	flow[:,:,1] += np.arange(h)[:,np.newaxis]
 	res = cv2.remap(img, flow, None, cv2.INTER_LINEAR)
+	res = tf.convert_to_tensor(res)
 
-	return tf.convert_to_tensor(res)
+	return tf.expand_dims(res, 0)
 
 def compute_disocclusion_mask(prev_frame, curr_frame, next_frame):
 	# TODO: implement weights matrix where value is 0 if pixel is disoccluded and

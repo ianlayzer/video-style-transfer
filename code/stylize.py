@@ -177,7 +177,9 @@ def stylize_frame(curr_content,
 	disocclusion_mask = []
 	if use_temporal_loss:
 		disocclusion_mask = compute_disocclusion_mask(prev_prev_content, prev_content, curr_content)
-		flow = get_flow_vectors(prev_content, curr_content)
+		prev_np = tf.squeeze(prev_content).numpy()
+		curr_np = tf.squeeze(curr_content).numpy()
+		flow = get_flow_vectors(prev_np, curr_np)
 
 	stylized = prev_stylized
 	if use_temporal_loss:
