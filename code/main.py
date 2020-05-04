@@ -14,7 +14,7 @@ video_path = "./../data/content/video/elephant.mp4"
 
 # # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 
-image_path = "./../data/content/images/Labrador.jpg"
+image_path = "./../data/content/images/chicago.jpg"
 style_path = "./../data/style/Starry_Night.jpg"
 
 
@@ -95,12 +95,13 @@ def main():
     if (ARGS.content):
         video_path = ARGS.content
         image_path = ARGS.content
+    style = '../data/style/' + ARGS.style 
     if ARGS.image and not(ARGS.video):
-        print("image style")
-        stylize_image(image_path, ARGS.style, ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.learning_rate, ARGS.num_epochs)
+        print()
+        stylize_image('../data/content/images/' + image_path, style, ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.learning_rate, ARGS.num_epochs)
     if ARGS.video and not(ARGS.image):
         print("video style") 
-        stylize_video(video_path, ARGS.style, ARGS.fps , ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.num_epochs, ARGS.learning_rate)
+        stylize_video('../data/content/video/' + video_path, style, ARGS.fps , ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.num_epochs, ARGS.learning_rate)
 
         
     
