@@ -290,7 +290,7 @@ def get_total_loss(content_features,
 	content_loss *= content_loss_weight
 	style_loss *= style_loss_weight
 	# add temporal loss if applicable
-	temporal_loss = 0
+	temporal_loss = tf.convert_to_tensor(0)
 	if use_temporal_loss:
 		temporal_loss = get_temporal_loss(previous_stylized, curr_stylized, disocclusion_mask, flow)
 		temporal_loss *= temporal_loss_weight
@@ -305,7 +305,6 @@ def layered_mean_squared_error(source_features, generated_features):
 
 def get_temporal_loss(previous_stylized, current_stylized, disocclusion_mask, flow):
 	
-	# TODO: implement temporal loss between 
 
 	warped_style_curr = apply_optical_flow(flow, previous_stylized)
 
