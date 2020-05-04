@@ -10,8 +10,8 @@ def get_flow_vectors(frame_1, frame_2):
 
 	#TODO: implement Gunner Farneback algorithm using OpenCV
 
-	img_1 = cv2.cvtColor(img_1,cv2.COLOR_RGB2GRAY)
-	img_2 = cv2.cvtColor(img_2,cv2.COLOR_RGB2GRAY)
+	img_1 = cv2.cvtColor(frame_1,cv2.COLOR_RGB2GRAY)
+	img_2 = cv2.cvtColor(frame_2,cv2.COLOR_RGB2GRAY)
 
 	#Calculate Flow
 	flow = cv2.calcOpticalFlowFarneback(img_1,img_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
