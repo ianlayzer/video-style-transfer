@@ -29,7 +29,7 @@ def preprocess_video(video_path):
 	video = cv2.VideoCapture(video_path)
 	i = 0
     # a variable to set how many frames you want to skip
-	frame_skip = 2
+	frame_skip = 0
 	while video.isOpened():
 		ret, frame = video.read()
 		if not ret:
