@@ -308,6 +308,6 @@ def get_temporal_loss(previous_stylized, current_stylized, disocclusion_mask, fl
 
 	warped_style_curr = apply_optical_flow(flow, previous_stylized)
 
-	loss = tf.where(disocclusion_mask, (current_stylized-warped_style_curr)**2, 0)
+	loss = tf.where(disocclusion_mask, (current_stylized-warped_style_curr)**2, 0.0)
 
 	return tf.reduce_mean(tf.dtypes.cast(loss, tf.float32))

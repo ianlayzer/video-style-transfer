@@ -29,7 +29,7 @@ def apply_optical_flow(flow, stylized_frame):
 	flow[:,:,0] += np.arange(w)
 	flow[:,:,1] += np.arange(h)[:,np.newaxis]
 	res = cv2.remap(img, flow, None, cv2.INTER_LINEAR)
-	res = tf.convert_to_tensor(res)
+	res = tf.convert_to_tensor(res, dtype=tf.constant)
 
 	return tf.expand_dims(res, 0)
 
