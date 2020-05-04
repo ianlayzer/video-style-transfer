@@ -10,12 +10,14 @@ def get_flow_vectors(frame_1, frame_2):
 
 	#TODO: implement Gunner Farneback algorithm using OpenCV
 
-	print(frame_1.shape)
-
 	img_1 = frame_1.numpy()
 	img_2 = frame_2.numpy()
 
-	print(img_1.shape)
+	if img_1.shape.count() ==4:
+		img_1 = np.reshape(img_1.shape[1], img_1.shape[2], img_1.shape[3])
+
+	if img_2.shape.count() ==4:
+		img_2 = np.reshape(img_2.shape[1], img_2.shape[2], img_2.shape[3])
 
 	img_1 = cv2.cvtColor(img_1,cv2.COLOR_RGB2GRAY)
 	img_2 = cv2.cvtColor(img_2,cv2.COLOR_RGB2GRAY)
