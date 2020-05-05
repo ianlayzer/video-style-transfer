@@ -97,7 +97,7 @@ def stylize_video(video_path,
 		stylized_frame_list.append(to_append)
 
 		# update previous stylized frame to the frame we just stylized with optical flow applied
-		previous = stylized
+		prev_style = stylized
 		# TODO: MAKE THIS WORK f, f+1, just numbers
 		# initial_stylized = apply_optical_flow(f, f+1, stylized)
 	output_frames = []
