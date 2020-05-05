@@ -71,14 +71,14 @@ def stylize_video(video_path,
 
 
 	# starts uninitialized because there is no previous stylized frame at beginning
-	previous = initialize_stylized()
+	prev_style = initialize_stylized()
 	# list to add stylized frames to
 	stylized_frame_list = []
 	# stylize every frame
 	for f in range(len(frame_list)):
 		prCyan("Stylizing Frame " + str(f+1))
 		# content target for this frame style transfer
-		content = frame_list[f]
+		curr_content = frame_list[f]
 		# stylize img
 		stylized = stylize_frame(curr_content=curr_content,
 									prev_content=curr_content,
