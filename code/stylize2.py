@@ -78,9 +78,11 @@ def stylize_video(video_path,
 	for f in range(len(frame_list)):
 		prCyan("Stylizing Frame " + str(f+1))
 		# content target for this frame style transfer
-		content = frame_list[f]
+		curr_content = frame_list[f]
 		# stylize img
-		stylized = stylize_frame(content=content, 
+		stylized = stylize_frame(curr_content=curr_content,
+								prev_content=curr_content,
+								prev_prev_content=curr_content, 
 								style=style, 
 								initial_stylized=previous, 
 								precomputed_style_grams=style_feature_grams,
@@ -119,7 +121,9 @@ def stylize_video(video_path,
 										num_epochs=num_epochs)
 	write_video(output_frames, fps, output_filepath)
 
-def stylize_frame(content, 
+def stylize_frame(curr_content,
+					prev_content,
+					prev_prev_content,
 					style, 
 					initial_stylized,  
 					content_loss_weight,
