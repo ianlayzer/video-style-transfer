@@ -205,6 +205,7 @@ def stylize_frame(curr_content,
 			temporal_loss = tf.constant(0.0)
 			if use_temporal_loss:
 				temporal_loss = get_temporal_loss(prev_stylized, stylized, disocclusion_mask, flow) * temporal_loss_weight
+				print(temporal_loss)
 
 
 			loss = content_loss + style_loss + temporal_loss
