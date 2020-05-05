@@ -180,7 +180,7 @@ def stylize_frame(curr_content,
 		weights_mask = compute_disocclusion_mask(prev_prev_content, prev_content, curr_content)
 		flow = get_flow_vectors(prev_content, curr_content)
 
-	stylized = initial_stylized
+	stylized = tf.identity(initial_stylized)
 	# we will compare stylized responses against these at each epoch to calculate loss
 	content_feature_maps = compute_all_feature_maps(curr_content, content_layers)
 	style_feature_grams = precomputed_style_grams
@@ -279,7 +279,7 @@ def get_temporal_loss(previous_stylized, current_stylized, weights_mask, flow):
 	
 	# TODO: implement temporal loss between 
 
-	print(flow)
+	# print(flow)
 	warped_style_curr = apply_optical_flow(flow, previous_stylized)
 	# print(warped_style_curr-current_stylized, "warped-stylized")
 	# print(current_stylized, "curr_stylized")
