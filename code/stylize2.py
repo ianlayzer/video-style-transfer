@@ -80,18 +80,34 @@ def stylize_video(video_path,
 		# content target for this frame style transfer
 		curr_content = frame_list[f]
 		# stylize img
-		stylized = stylize_frame(curr_content=curr_content,
-								prev_content=curr_content,
-								prev_prev_content=curr_content, 
-								style=style, 
-								initial_stylized=previous, 
-								precomputed_style_grams=style_feature_grams,
-								use_temporal_loss=False,
-								content_loss_weight=content_loss_weight,
-								style_loss_weight=style_loss_weight,
-								temporal_loss_weight=temporal_loss_weight,
-								learning_rate=learning_rate,
-								num_epochs=num_epochs)
+		if f < 2:
+			stylized = stylize_frame(curr_content=curr_content,
+									prev_content=curr_content,
+									prev_prev_content=curr_content, 
+									style=style, 
+									initial_stylized=previous, 
+									precomputed_style_grams=style_feature_grams,
+									use_temporal_loss=False,
+									content_loss_weight=content_loss_weight,
+									style_loss_weight=style_loss_weight,
+									temporal_loss_weight=temporal_loss_weight,
+									learning_rate=learning_rate,
+									num_epochs=num_epochs)
+		else:
+			prev_content = frame_list[f-1]
+			prev_prev_content = frame_list[f-2]
+			stylized = stylize_frame(curr_content=curr_content,
+									prev_content=prev_content,
+									prev_prev_content=prev_prev_content, 
+									style=style, 
+									initial_stylized=previous, 
+									precomputed_style_grams=style_feature_grams,
+									use_temporal_loss=False,
+									content_loss_weight=content_loss_weight,
+									style_loss_weight=style_loss_weight,
+									temporal_loss_weight=temporal_loss_weight,
+									learning_rate=learning_rate,
+									num_epochs=num_epochs)
 		# add to stylized frame list
 		to_append = tf.identity(stylized)
 		stylized_frame_list.append(to_append)
