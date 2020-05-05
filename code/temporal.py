@@ -18,12 +18,16 @@ def get_flow_vectors(frame_1, frame_2):
 
 	#Calculate Flow
 	flow = cv2.calcOpticalFlowFarneback(img_1,img_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+	flow = tf.constant(flow, dtype=tf.float32)
+
 	return flow
 
 def apply_optical_flow(flow, stylized_frame):
 
 	# TODO: apply optical flow from frame to next frame onto stylized frame
 	img = tf.squeeze(stylized_frame).numpy()
+	flow = flow.numpy()
 	h, w = flow.shape[:2]
 	flow = -flow
 	flow[:,:,0] += np.arange(w)
@@ -37,8 +41,8 @@ def compute_disocclusion_mask(prev_frame, curr_frame, next_frame):
 	# TODO: implement weights matrix where value is 0 if pixel is disoccluded and
 	# 1 otherwise?
 
-	forward_flow = get_flow_vectors(prev_frame, curr_frame)
-	backward_flow = get_flow_vectors(next_frame, curr_frame)
+	forward_flow = get_flow_vectors(prev_frame, curr_frame).numpy()
+	backward_flow = get_flow_vectors(next_frame, curr_frame).numpy()
 
 	# forward_warp = apply_optical_flow(forward_flow, prev_frame)
 	# backward_warp = apply_optical_flow(backward_flow, next_frame)
