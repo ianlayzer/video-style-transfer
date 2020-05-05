@@ -154,6 +154,7 @@ def stylize_frame(content,
 	# the previous stylized frame
 	# previous_stylized = tf.identity(initial_stylized)
 	# TODO: temporal weights mask
+	timelapse_frames = []
 	flow = []
 	weights_mask = []
 	if use_temporal_loss:
@@ -171,6 +172,7 @@ def stylize_frame(content,
 	optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
 	# Optimizes images to minimize loss between input content image/input style image and output stylized image
 	for e in range(num_epochs):
+		timelapse_frames.append(tf.identity(stylized))
 		# Watches loss computation (output_stylized_img watched by default since declared as variable)
 		with tf.GradientTape() as tape:
 			# compute stylized features response to content and style layers
@@ -198,6 +200,18 @@ def stylize_frame(content,
 		# 	tf.keras.preprocessing.image.save_img('epoch' + str(e) + '.jpg', output_image)
 
 	# return to be used as initial stylized for next frame
+
+	output_frames = []
+	for stylized_image in timelapse_frames:
+		output_image = tf.squeeze(stylized_image).numpy()
+		output_image = cv2.normalize(output_image, None, 0 , 255,cv2.NORM_MINMAX,cv2.CV_8U)
+		# plt.imshow(output_image)
+		# plt.show()
+		output_frames.append(output_image)
+	# write video
+	output_filepath = "./../data/output/video/"
+	output_filepath += "timelapse.mp4"
+	write_video(output_frames, 100, output_filepath)
 	return stylized
 
 def initialize_stylized():
