@@ -115,7 +115,7 @@ def stylize_video(video_path,
 		stylized_frame_list.append(to_append)
 
 		# update previous stylized frame to the frame we just stylized with optical flow applied
-		prev_style = stylized
+		prev_style = tf.identity(stylized)
 
 	output_frames = []
 	for stylized_image in stylized_frame_list:
@@ -179,6 +179,10 @@ def stylize_frame(curr_content,
 	if use_temporal_loss:
 		disocclusion_mask = tf.py_function(compute_disocclusion_mask, [prev_prev_content, prev_content, curr_content], Tout=tf.bool)
 		flow = tf.py_function(get_flow_vectors, [prev_content, curr_content], Tout=tf.float32)
+
+		#non-wrapped:
+		# disocclusion_mask = compute_disocclusion_mask(prev_prev_content, prev_content, curr_content)
+		# flow = get_flow_vectors(prev_content, curr_content)
 
 	stylized = prev_stylized
 	if use_temporal_loss:
