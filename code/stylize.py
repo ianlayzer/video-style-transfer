@@ -27,8 +27,8 @@ def stylize_image(content_path,
 					temporal_loss_weight,
 					learning_rate,
 					num_epochs):
-	content = preprocess_image("./../data/content/images/Labrador.jpg")
-	style = preprocess_image("./../data/style/Starry_Night.jpg")
+	content = preprocess_image(content_path)
+	style = preprocess_image(style_path)
 	stylized = initialize_stylized()
 	# stylized = tf.Variable(tf.identity(content))
 	output_image = stylize_frame(curr_content=content, 

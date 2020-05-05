@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from cv2 import VideoWriter, VideoWriter_fourcc
 
-
 def preprocess_image(image_path):
 	image = tf.io.read_file(image_path)
 	image = tf.image.decode_image(image, channels=3, dtype=tf.float32)
@@ -57,11 +56,11 @@ def write_video(frames, fps, filename):
 def make_filename(content_path, 
                     style_path, 
                     file_type,
-                    content_loss_weight=hp.content_loss_weight,
-                    style_loss_weight=hp.style_loss_weight,
-                    temporal_loss_weight=hp.temporal_loss_weight,
-                    learning_rate=hp.learning_rate,
-                    num_epochs=hp.num_epochs,
+                    content_loss_weight,
+                    style_loss_weight,
+                    temporal_loss_weight,
+                    learning_rate,
+                    num_epochs,
                     fps=None):
 	content_name = get_filename_from_path(content_path)
 	style_name = get_filename_from_path(style_path)
