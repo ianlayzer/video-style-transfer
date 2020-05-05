@@ -278,14 +278,9 @@ def layered_mean_squared_error(source_features, generated_features):
 	return total_loss
 
 def get_temporal_loss(previous_stylized, current_stylized, disocclusion_mask, flow):
-	
 
-	warped_style_curr = apply_optical_flow(flow, previous_stylized)
-	print(current_stylized-warped_style_curr, "warped")
-	# print(disocclusion_mask, "disoclluse")
+	warped_style_curr = tf.constant(apply_optical_flow(flow, previous_stylized))
 
 	loss = tf.where(disocclusion_mask, (current_stylized-warped_style_curr)**2, 0.0)
-	# loss = tf.where(disocclusion_mask, 2.0, 0.0)
-	print(loss, "loss")
 
-	return tf.reduce_mean(tf.dtypes.cast(loss, tf.float32))
+	return tf.reduce_mean(loss)
