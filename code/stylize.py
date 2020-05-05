@@ -270,32 +270,6 @@ def compute_feature_map_gram(feature_map):
 
 	return tf.linalg.matmul(a, b)
 
-# Gets content loss, style loss, then multiplies them by corresponding weights to get total loss
-# (Weights are different than the paper, but after lots of trial and error these seem to work well)
-#       They might be different due to the different optimizer?
-def get_total_loss(content_features, 
-					style_feature_grams, 
-					stylized_content_features, 
-					stylized_style_feature_grams, 
-					use_temporal_loss, 
-					curr_stylized,
-					previous_stylized,
-					disocclusion_mask, 
-					flow,
-					content_loss_weight=hp.content_loss_weight,
-					style_loss_weight=hp.style_loss_weight,
-					temporal_loss_weight=hp.temporal_loss_weight):
-
-	# add temporal loss if applicable
-	temporal_loss = tf.convert_to_tensor(0.0)
-	if use_temporal_loss:
-		temporal_loss = get_temporal_loss(previous_stylized, curr_stylized, disocclusion_mask, flow)
-		temporal_loss *= temporal_loss_weight
-	print(content_loss, "content")
-	print(style_loss, "style")
-	print(temporal_loss, "temporal")
-	return content_loss, style_loss, temporal_loss
-
 def layered_mean_squared_error(source_features, generated_features):
 	total_loss = tf.constant(0.0)
 	for i in range(len(source_features)):
@@ -307,7 +281,10 @@ def get_temporal_loss(previous_stylized, current_stylized, disocclusion_mask, fl
 	
 
 	warped_style_curr = apply_optical_flow(flow, previous_stylized)
+	print(warped_style_curr, "warped")
+	print(disocclusion_mask, "disoclluse")
 
 	loss = tf.where(disocclusion_mask, (current_stylized-warped_style_curr)**2, 0.0)
+	print(loss, "loss")
 
 	return tf.reduce_mean(tf.dtypes.cast(loss, tf.float32))
