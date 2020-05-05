@@ -205,8 +205,6 @@ def stylize_frame(curr_content,
 			temporal_loss = tf.constant(0.0)
 			if use_temporal_loss:
 				temporal_loss = get_temporal_loss(prev_stylized, stylized, disocclusion_mask, flow) * temporal_loss_weight
-				print(temporal_loss)
-
 
 			loss = content_loss + style_loss + temporal_loss
 		if e % 100 == 0:
@@ -279,7 +277,9 @@ def layered_mean_squared_error(source_features, generated_features):
 
 def get_temporal_loss(previous_stylized, current_stylized, disocclusion_mask, flow):
 
-	warped_style_curr = tf.constant(apply_optical_flow(flow, previous_stylized))
+	warped_style_curr = tf.Variable(apply_optical_flow(flow, previous_stylized), trainable=False)
+
+	disocclusion_mask = tf.Variable(disocclusion_mask, trainable=False)
 
 	loss = tf.where(disocclusion_mask, (current_stylized-warped_style_curr)**2, 0.0)
 
