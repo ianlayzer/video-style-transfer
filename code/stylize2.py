@@ -31,7 +31,7 @@ def stylize_image(content_path,
 	style = preprocess_image(style_path)
 	stylized = initialize_stylized()
 	# stylized = tf.Variable(tf.identity(content))
-	output_image = stylize_frame(content, style, stylized, content_loss_weight=content_loss_weight,
+	output_image = stylize_frame(content, content, content, style, stylized, False, content_loss_weight=content_loss_weight,
 															style_loss_weight=style_loss_weight,
 															temporal_loss_weight=temporal_loss_weight,
 															num_epochs=num_epochs,
