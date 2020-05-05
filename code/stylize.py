@@ -115,7 +115,7 @@ def stylize_video(video_path,
 		stylized_frame_list.append(to_append)
 
 		# update previous stylized frame to the frame we just stylized with optical flow applied
-		prev_style = tf.identity(stylized)
+		prev_style = stylized
 
 	output_frames = []
 	for stylized_image in stylized_frame_list:
