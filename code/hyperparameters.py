@@ -2,7 +2,7 @@
 # content_loss_weight = 30000
 content_loss_weight = 10000
 style_loss_weight = .03
-temporal_loss_weight = 10
+temporal_loss_weight = 100000000
 # img dimensions
 img_height = 216
 img_width = 384
