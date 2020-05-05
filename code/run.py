@@ -9,4 +9,4 @@ video_path = "./../data/content/video/tom_jerry_short.mp4"
 content_path = "./../data/content/images/Labrador.jpg"
 style_path = "./../data/style/Starry_Night.jpg"
 
-stylize_video(video_path, style_path, 1, hp.content_loss_weight, hp.style_loss_weight, hp.temporal_loss_weight, hp.num_epochs, hp.learning_rate, False)
+stylize_video(video_path, style_path, 1, hp.content_loss_weight, hp.style_loss_weight, hp.temporal_loss_weight, hp.num_epochs, hp.learning_rate, True)
