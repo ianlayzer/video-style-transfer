@@ -184,7 +184,7 @@ def stylize_frame(curr_content,
 		# disocclusion_mask = compute_disocclusion_mask(prev_prev_content, prev_content, curr_content)
 		# flow = get_flow_vectors(prev_content, curr_content)
 
-	stylized = tf.Variable(tf.identity(prev_stylized))
+	stylized = tf.identity(prev_stylized)
 	if use_temporal_loss:
 		stylized = apply_optical_flow(flow, prev_stylized)
 	# we will compare stylized responses against these at each epoch to calculate loss
