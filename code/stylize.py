@@ -199,15 +199,14 @@ def stylize_frame(curr_content,
 			stylized_content_features = compute_all_feature_maps(stylized, content_layers)
 			stylized_style_feature_grams = features_to_grams(compute_all_feature_maps(stylized, style_layers))
 			# calculate loss
-			content_loss, style_loss, temporal_loss = get_total_loss(content_features=content_feature_maps, 
-																		style_feature_grams=style_feature_grams, 
-																		stylized_content_features=stylized_content_features, 
-																		stylized_style_feature_grams=stylized_style_feature_grams,
-																		use_temporal_loss=use_temporal_loss, 
-																		curr_stylized=stylized,
-																		previous_stylized=prev_stylized,
-																		disocclusion_mask=disocclusion_mask, 
-																		flow=flow)
+
+			content_loss = layered_mean_squared_error(content_feature_maps, stylized_content_features) * content_loss_weight
+			style_loss = layered_mean_squared_error(style_feature_grams, stylized_style_feature_grams) * style_loss_weight
+			temporal_loss = tf.constant(0.0)
+			if use_temporal_loss:
+				temporal_loss = get_temporal_loss(prev_stylized, stylized, disocclusion_mask, flow) * temporal_loss_weight
+
+
 			loss = content_loss + style_loss + temporal_loss
 		if e % 100 == 0:
 			print("Epoch " + str(e) + ": Content Loss = " + str(content_loss.numpy()) + " Style Loss = " + str(style_loss.numpy()), " Temporal Loss = " + str(temporal_loss.numpy()))
@@ -285,11 +284,7 @@ def get_total_loss(content_features,
 					content_loss_weight=hp.content_loss_weight,
 					style_loss_weight=hp.style_loss_weight,
 					temporal_loss_weight=hp.temporal_loss_weight):
-	content_loss = layered_mean_squared_error(content_features, stylized_content_features)
-	style_loss = layered_mean_squared_error(style_feature_grams, stylized_style_feature_grams)
 
-	content_loss *= content_loss_weight
-	style_loss *= style_loss_weight
 	# add temporal loss if applicable
 	temporal_loss = tf.convert_to_tensor(0.0)
 	if use_temporal_loss:
