@@ -296,7 +296,7 @@ def get_total_loss(content_features,
 		temporal_loss = get_temporal_loss(previous_stylized, curr_stylized, disocclusion_mask, flow)
 		temporal_loss *= temporal_loss_weight
 	print(content_loss, "content")
-	print(styel_loss, "style")
+	print(style_loss, "style")
 	print(temporal_loss, "temporal")
 	return content_loss, style_loss, temporal_loss
 
