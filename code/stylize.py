@@ -88,6 +88,7 @@ def stylize_video(video_path,
 								content_loss_weight=content_loss_weight,
 								style_loss_weight=style_loss_weight,
 								temporal_loss_weight=temporal_loss_weight,
+								learning_rate=learning_rate,
 								num_epochs=num_epochs)
 		# add to stylized frame list
 		to_append = tf.identity(stylized)
