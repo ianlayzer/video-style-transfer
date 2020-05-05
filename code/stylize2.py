@@ -167,7 +167,7 @@ def stylize_frame(curr_content,
 
 	stylized = initial_stylized
 	# we will compare stylized responses against these at each epoch to calculate loss
-	content_feature_maps = compute_all_feature_maps(content, content_layers)
+	content_feature_maps = compute_all_feature_maps(curr_content, content_layers)
 	style_feature_grams = precomputed_style_grams
 	# check if we need to compute style target style responses now or if already computed
 	if style_feature_grams is None:
