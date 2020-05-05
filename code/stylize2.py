@@ -87,7 +87,6 @@ def stylize_video(video_path,
 								initial_stylized=previous, 
 								precomputed_style_grams=style_feature_grams,
 								use_temporal_loss=False,
-								frames=None,
 								content_loss_weight=content_loss_weight,
 								style_loss_weight=style_loss_weight,
 								temporal_loss_weight=temporal_loss_weight,
@@ -132,8 +131,7 @@ def stylize_frame(curr_content,
 					learning_rate,
 					num_epochs, 
 					precomputed_style_grams=None, 
-					use_temporal_loss=False, 
-					frames=None):
+					use_temporal_loss=False):
 	"""Generates a stylized still image frame using the content from content, the
 	style from style. The stylized image is initialized as the inputted stylized image.
 	We can also pass in stylized feature maps rather than a stylized image, in which
@@ -161,9 +159,9 @@ def stylize_frame(curr_content,
 	# TODO: temporal weights mask
 	flow = []
 	weights_mask = []
-	if use_temporal_loss:
-		weights_mask = compute_disocclusion_mask(frames[0], frames[1], frames[2])
-		flow = get_flow_vectors(frames[0], frames[1])
+	# if use_temporal_loss:
+		# weights_mask = compute_disocclusion_mask(frames[0], frames[1], frames[2])
+		# flow = get_flow_vectors(frames[0], frames[1])
 
 	stylized = initial_stylized
 	# we will compare stylized responses against these at each epoch to calculate loss
