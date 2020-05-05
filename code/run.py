@@ -1,4 +1,4 @@
-from stylize import stylize_image, stylize_video
+from stylize2 import stylize_image, stylize_video
 import hyperparameters as hp
 
 video_path = "./../data/content/video/tom_jerry_short.mp4"
