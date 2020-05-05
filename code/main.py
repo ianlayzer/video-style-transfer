@@ -86,7 +86,13 @@ def parse_args():
         required=False,
         type=str,
         default=image_path,
-        help='content file.')                                             
+        help='content file.')
+    parser.add_argument(
+        '--fps',
+        required=False,
+        type=int,
+        default=29,
+        help='fps.')                                                   
     return parser.parse_args()
 
 def main():
