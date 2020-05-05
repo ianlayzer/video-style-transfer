@@ -160,8 +160,8 @@ def stylize_frame(curr_content,
 	flow = []
 	weights_mask = []
 	# if use_temporal_loss:
-		# weights_mask = compute_disocclusion_mask(frames[0], frames[1], frames[2])
-		# flow = get_flow_vectors(frames[0], frames[1])
+	# 	weights_mask = compute_disocclusion_mask(frames[0], frames[1], frames[2])
+	# 	flow = get_flow_vectors(frames[0], frames[1])
 
 	stylized = initial_stylized
 	# we will compare stylized responses against these at each epoch to calculate loss
@@ -182,13 +182,16 @@ def stylize_frame(curr_content,
 			# calculate loss
 			content_loss = content_loss_weight * layered_mean_squared_error(content_feature_maps, stylized_content_features)
 			style_loss = style_loss_weight * layered_mean_squared_error(style_feature_grams, stylized_style_feature_grams)
-			loss = content_loss + style_loss
+			temporal_loss = tf.constant(0.0)
+			if use_temporal_loss:
+				temporal_loss = temporal_loss_weight * get_temporal_loss(initial_stylized, stylized, weights_mask, flow)
+			loss = content_loss + style_loss + temporal_loss
 			# add temporal loss if applicable
 			# if use_temporal_loss:
 				# TODO: temporal loss
 
 		if e % 100 == 0:
-			print("Epoch " + str(e) + ": Content Loss = " + str(content_loss.numpy()) + " Style Loss = " + str(style_loss.numpy()))
+			print("Epoch " + str(e) + ": Content Loss = " + str(content_loss.numpy()) + " Style Loss = " + str(style_loss.numpy()), " Temporal Loss = " + str(temporal_loss.numpy()))
 		# calculate gradient of loss with respect to the stylized image (a variable)
 		grad = tape.gradient(loss, stylized)
 		# Applies this gradient to the image
