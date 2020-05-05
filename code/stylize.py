@@ -284,7 +284,8 @@ def get_temporal_loss(previous_stylized, current_stylized, disocclusion_mask, fl
 	print(warped_style_curr, "warped")
 	print(disocclusion_mask, "disoclluse")
 
-	loss = tf.where(disocclusion_mask, (current_stylized-warped_style_curr)**2, 0.0)
+	# loss = tf.where(disocclusion_mask, (current_stylized-warped_style_curr)**2, 0.0)
+	loss = tf.where(disocclusion_mask, 2.0, 0.0)
 	print(loss, "loss")
 
 	return tf.reduce_mean(tf.dtypes.cast(loss, tf.float32))
