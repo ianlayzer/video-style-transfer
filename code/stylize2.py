@@ -279,8 +279,9 @@ def get_temporal_loss(previous_stylized, current_stylized, weights_mask, flow):
 	
 	# TODO: implement temporal loss between 
 
+	print(flow)
 	warped_style_curr = apply_optical_flow(flow, previous_stylized)
-	print(warped_style_curr-current_stylized, "warped-stylized")
+	# print(warped_style_curr-current_stylized, "warped-stylized")
 	# print(current_stylized, "curr_stylized")
 
 	loss = tf.where(weights_mask, (current_stylized-warped_style_curr)**2, 0)
