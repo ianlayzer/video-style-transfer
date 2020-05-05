@@ -176,11 +176,12 @@ def stylize_frame(curr_content,
 	print(use_temporal_loss, "use_loss")
 	flow = []
 	weights_mask = []
+	stylized = tf.Variable(initial_stylized)
 	if use_temporal_loss:
 		weights_mask = compute_disocclusion_mask(prev_prev_content, prev_content, curr_content)
 		flow = get_flow_vectors(prev_content, curr_content)
+		stylized = tf.Variable(apply_optical_flow(flow, initial_stylized))
 
-	stylized = tf.Variable(initial_stylized)
 	# we will compare stylized responses against these at each epoch to calculate loss
 	content_feature_maps = compute_all_feature_maps(curr_content, content_layers)
 	style_feature_grams = precomputed_style_grams
