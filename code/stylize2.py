@@ -173,6 +173,7 @@ def stylize_frame(curr_content,
 	# the previous stylized frame
 	# previous_stylized = tf.identity(initial_stylized)
 	# TODO: temporal weights mask
+	print(use_temporal_loss, "use_loss")
 	flow = []
 	weights_mask = []
 	if use_temporal_loss:
