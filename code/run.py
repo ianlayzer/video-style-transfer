@@ -6,8 +6,8 @@ video_path = "./../data/content/video/tom_jerry_short.mp4"
 
 # # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 
-image_path = "./../data/content/images/Labrador.jpg"
-style_path = "./../data/style/Starry_Night.jpg"
+image_path = "./../data/content/images/elephant_pic.jpg"
+style_path = "./../data/style/Eyal_style.jpg"
 
 stylize_image(image_path, style_path, hp.content_loss_weight, hp.style_loss_weight, hp.temporal_loss_weight, hp.learning_rate, hp.num_epochs)
 # stylize_video(video_path, style_path, 1, hp.content_loss_weight, hp.style_loss_weight, hp.temporal_loss_weight, hp.num_epochs, hp.learning_rate, True)
