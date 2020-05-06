@@ -29,13 +29,20 @@ def stylize_image(content_path,
 					num_epochs):
 	content = preprocess_image(content_path)
 	style = preprocess_image(style_path)
-	stylized = initialize_stylized()
+	stylized = content
+	# initialize_stylized()
 	# stylized = tf.Variable(tf.identity(content))
-	output_image = stylize_frame(content, style, stylized, content_loss_weight=content_loss_weight,
-															style_loss_weight=style_loss_weight,
-															temporal_loss_weight=temporal_loss_weight,
-															num_epochs=num_epochs,
-															learning_rate=learning_rate)
+	output_image = stylize_frame(curr_content =content, 
+								prev_content = content,
+								prev_prev_content= content,
+								style=style, 
+								initial_stylized=stylized, 
+								content_loss_weight=content_loss_weight,
+								style_loss_weight=style_loss_weight,
+								temporal_loss_weight=temporal_loss_weight,
+								num_epochs=num_epochs,
+								learning_rate=learning_rate,
+								use_temporal_loss=False)
 
 	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
 
@@ -49,6 +56,8 @@ def stylize_image(content_path,
 							num_epochs=num_epochs,
 							learning_rate=learning_rate)
 	tf.keras.preprocessing.image.save_img(name, output_image)
+
+	
 
 
 def stylize_video(video_path, 
@@ -71,7 +80,8 @@ def stylize_video(video_path,
 
 
 	# starts uninitialized because there is no previous stylized frame at beginning
-	previous = initialize_stylized()
+	previous = frame_list[0]
+	# initialize_stylized()
 	# list to add stylized frames to
 	stylized_frame_list = []
 	# stylize every frame
