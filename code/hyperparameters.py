@@ -13,7 +13,7 @@ style_layer_weights = [1, 1, 1, 1, 1]
 learning_rate = 0.04
 
 # number of iterations for gradient descent
-num_epochs = 100
+num_epochs = 600
 
 
 # img_height = 224
