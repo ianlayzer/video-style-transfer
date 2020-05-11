@@ -29,7 +29,7 @@ def stylize_image(content_path,
 					num_epochs):
 	content = preprocess_image(content_path)
 	style = preprocess_image(style_path)
-	stylized = initialize_stylized()
+	stylized = content
 	# stylized = tf.Variable(tf.identity(content))
 	output_image = stylize_frame(curr_content=content, 
 								prev_content=content, 

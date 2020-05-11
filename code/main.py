@@ -14,8 +14,8 @@ video_path = "./../data/content/video/elephant.mp4"
 
 # # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 
-image_path = "./../data/content/images/chicago.jpg"
-style_path = "./../data/style/Starry_Night.jpg"
+image_path = "chicago.jpg"
+style_path = "Starry_Night.jpg"
 
 
 

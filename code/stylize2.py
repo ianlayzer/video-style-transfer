@@ -57,7 +57,12 @@ def stylize_image(content_path,
 							learning_rate=learning_rate)
 	tf.keras.preprocessing.image.save_img(name, output_image)
 
-	
+def initialize_stylized():
+	# Output stylized image
+	output_stylized_img = tf.random.normal((1, image_height, image_width, 3), mean=0.5)
+	output_stylized_img = tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0)
+	output_stylized_img = tf.Variable(output_stylized_img)
+	return output_stylized_img	
 
 
 def stylize_video(video_path, 

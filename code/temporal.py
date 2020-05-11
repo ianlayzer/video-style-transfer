@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from cv2 import VideoWriter, VideoWriter_fourcc
+from pyflow import demo
 
 def get_flow_vectors(frame_1, frame_2):
 
@@ -13,11 +14,7 @@ def get_flow_vectors(frame_1, frame_2):
 	img_1 = tf.squeeze(frame_1).numpy()
 	img_2 = tf.squeeze(frame_2).numpy()
 
-	img_1 = cv2.cvtColor(img_1,cv2.COLOR_RGB2GRAY)
-	img_2 = cv2.cvtColor(img_2,cv2.COLOR_RGB2GRAY)
-
-	#Calculate Flow
-	flow = cv2.calcOpticalFlowFarneback(img_1,img_2, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+	flow = demo.calculateFlow(img_1, img_2)
 
 	flow = tf.constant(flow, dtype=tf.float32)
 
@@ -59,7 +56,7 @@ def compute_disocclusion_mask(prev_frame, curr_frame, next_frame):
 	mask = LHS <= RHS
 
 	#Not using boolean mask rn because it is shit with Farneback optical flow
-	mask.fill(1)
+	# mask.fill(1)
 
 	mask = tf.convert_to_tensor(mask, dtype=bool)
 
