@@ -9,13 +9,11 @@ from stylize import stylize_video
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 data_folder = os.path.dirname(__file__) + '../data/'
 framerate = 30
-video_path = "./../data/content/video/elephant.mp4"
+
 # # style_path = tf.keras.utils.get_file('kandinsky.jpg','https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg')
 
 # # content_path = tf.keras.utils.get_file('Labrador.jpg', 'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg')
 
-image_path = "chicago.jpg"
-style_path = "Starry_Night.jpg"
 
 
 
@@ -36,21 +34,17 @@ def parse_args():
         action='store_true',
         help='''are you loading in an image?''')
     parser.add_argument(
-        '--both',
+        '--fps',
         required=False,
-        action="store_true",
-        help='both short and long term consistency.')   
-    parser.add_argument(
-        '--short',
-        required=False,
-        action="store_true",
-        help='enforce short term consistency.')
+        type=int,
+        default=30,
+        help='''fps of the video, if applicable''')    
     parser.add_argument(
         '--num_epochs',
         required=False,
         type=int,
         default=hp.num_epochs,
-        help='hyperparameter number of epochs.')                           
+        help='hp number of epochs.')                           
     parser.add_argument(
         '--learning_rate',
         required=False,
@@ -77,22 +71,20 @@ def parse_args():
         help='adjust temporal loss weight.')
     parser.add_argument(
         '--style',
-        required=False,
+        required=True,
         type=str,
-        default=style_path,
         help='style file.')
     parser.add_argument(
         '--content',
-        required=False,
+        required=True,
         type=str,
-        default=image_path,
         help='content file.')
     parser.add_argument(
-        '--fps',
+        '--flow',
         required=False,
-        type=int,
-        default=29,
-        help='fps.')                                                   
+        type=bool,
+        default=True,
+        help='short term consistency boolean.')                                                 
     return parser.parse_args()
 
 def main():
@@ -107,7 +99,7 @@ def main():
         stylize_image('../data/content/images/' + image_path, style, ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.learning_rate, ARGS.num_epochs)
     if ARGS.video and not(ARGS.image):
         print("video style") 
-        stylize_video('../data/content/video/' + video_path, style, ARGS.fps , ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.num_epochs, ARGS.learning_rate)
+        stylize_video('../data/content/video/' + video_path, style, ARGS.fps , ARGS.content_weight, ARGS.style_weight, ARGS.temporal_weight, ARGS.num_epochs, ARGS.learning_rate, ARGS.flow)
 
         
     

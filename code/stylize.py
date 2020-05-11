@@ -29,13 +29,20 @@ def stylize_image(content_path,
 					num_epochs):
 	content = preprocess_image(content_path)
 	style = preprocess_image(style_path)
-	stylized = initialize_stylized()
+	stylized = content
+	# initialize_stylized()
 	# stylized = tf.Variable(tf.identity(content))
-	output_image = stylize_frame(content, style, stylized, content_loss_weight=content_loss_weight,
-															style_loss_weight=style_loss_weight,
-															temporal_loss_weight=temporal_loss_weight,
-															num_epochs=num_epochs,
-															learning_rate=learning_rate)
+	output_image = stylize_frame(curr_content =content, 
+								prev_content = content,
+								prev_prev_content= content,
+								style=style, 
+								initial_stylized=stylized, 
+								content_loss_weight=content_loss_weight,
+								style_loss_weight=style_loss_weight,
+								temporal_loss_weight=temporal_loss_weight,
+								num_epochs=num_epochs,
+								learning_rate=learning_rate,
+								use_temporal_loss=False)
 
 	output_image = tf.reverse(tf.squeeze(output_image), axis=[-1]).numpy()
 
@@ -50,6 +57,13 @@ def stylize_image(content_path,
 							learning_rate=learning_rate)
 	tf.keras.preprocessing.image.save_img(name, output_image)
 
+def initialize_stylized():
+	# Output stylized image
+	output_stylized_img = tf.random.normal((1, image_height, image_width, 3), mean=0.5)
+	output_stylized_img = tf.clip_by_value(output_stylized_img, clip_value_min=0.0, clip_value_max=1.0)
+	output_stylized_img = tf.Variable(output_stylized_img)
+	return output_stylized_img	
+
 
 def stylize_video(video_path, 
 					style_path, 
@@ -58,7 +72,8 @@ def stylize_video(video_path,
 					style_loss_weight,
 					temporal_loss_weight,
 					num_epochs,
-					learning_rate):
+					learning_rate,
+					use_temporal_loss):
 	# get preprocessed frame list
 	frame_list = preprocess_video(video_path)
 
@@ -70,26 +85,44 @@ def stylize_video(video_path,
 
 
 	# starts uninitialized because there is no previous stylized frame at beginning
-	previous = initialize_stylized()
+	previous = frame_list[0]
+	# initialize_stylized()
 	# list to add stylized frames to
 	stylized_frame_list = []
 	# stylize every frame
 	for f in range(len(frame_list)):
 		prCyan("Stylizing Frame " + str(f+1))
 		# content target for this frame style transfer
-		content = frame_list[f]
+		curr_content = frame_list[f]
 		# stylize img
-		stylized = stylize_frame(content=content, 
-								style=style, 
-								initial_stylized=previous, 
-								precomputed_style_grams=style_feature_grams,
-								use_temporal_loss=False,
-								frames=None,
-								content_loss_weight=content_loss_weight,
-								style_loss_weight=style_loss_weight,
-								temporal_loss_weight=temporal_loss_weight,
-								learning_rate=learning_rate,
-								num_epochs=num_epochs)
+		if f < 2:
+			stylized = stylize_frame(curr_content=curr_content,
+									prev_content=curr_content,
+									prev_prev_content=curr_content, 
+									style=style, 
+									initial_stylized=previous, 
+									precomputed_style_grams=style_feature_grams,
+									use_temporal_loss=False,
+									content_loss_weight=content_loss_weight,
+									style_loss_weight=style_loss_weight,
+									temporal_loss_weight=temporal_loss_weight,
+									learning_rate=learning_rate,
+									num_epochs=num_epochs)
+		else:
+			prev_content = frame_list[f-1]
+			prev_prev_content = frame_list[f-2]
+			stylized = stylize_frame(curr_content=curr_content,
+									prev_content=prev_content,
+									prev_prev_content=prev_prev_content, 
+									style=style, 
+									initial_stylized=previous, 
+									precomputed_style_grams=style_feature_grams,
+									use_temporal_loss=use_temporal_loss,
+									content_loss_weight=content_loss_weight,
+									style_loss_weight=style_loss_weight,
+									temporal_loss_weight=temporal_loss_weight,
+									learning_rate=learning_rate,
+									num_epochs=num_epochs)
 		# add to stylized frame list
 		to_append = tf.identity(stylized)
 		stylized_frame_list.append(to_append)
@@ -118,7 +151,9 @@ def stylize_video(video_path,
 										num_epochs=num_epochs)
 	write_video(output_frames, fps, output_filepath)
 
-def stylize_frame(content, 
+def stylize_frame(curr_content,
+					prev_content,
+					prev_prev_content,
 					style, 
 					initial_stylized,  
 					content_loss_weight,
@@ -126,9 +161,8 @@ def stylize_frame(content,
 					temporal_loss_weight,
 					learning_rate,
 					num_epochs, 
-					precomputed_style_grams=None, 
-					use_temporal_loss=False, 
-					frames=None):
+					use_temporal_loss,
+					precomputed_style_grams=None):
 	"""Generates a stylized still image frame using the content from content, the
 	style from style. The stylized image is initialized as the inputted stylized image.
 	We can also pass in stylized feature maps rather than a stylized image, in which
@@ -154,15 +188,17 @@ def stylize_frame(content,
 	# the previous stylized frame
 	# previous_stylized = tf.identity(initial_stylized)
 	# TODO: temporal weights mask
+	print(use_temporal_loss, "use_loss")
 	flow = []
 	weights_mask = []
+	stylized = tf.Variable(initial_stylized)
 	if use_temporal_loss:
-		weights_mask = compute_disocclusion_mask(frames[0], frames[1], frames[2])
-		flow = get_flow_vectors(frames[0], frames[1])
+		weights_mask = compute_disocclusion_mask(prev_prev_content, prev_content, curr_content)
+		flow = get_flow_vectors(prev_content, curr_content)
+		stylized = tf.Variable(apply_optical_flow(flow, initial_stylized))
 
-	stylized = initial_stylized
 	# we will compare stylized responses against these at each epoch to calculate loss
-	content_feature_maps = compute_all_feature_maps(content, content_layers)
+	content_feature_maps = compute_all_feature_maps(curr_content, content_layers)
 	style_feature_grams = precomputed_style_grams
 	# check if we need to compute style target style responses now or if already computed
 	if style_feature_grams is None:
@@ -179,13 +215,16 @@ def stylize_frame(content,
 			# calculate loss
 			content_loss = content_loss_weight * layered_mean_squared_error(content_feature_maps, stylized_content_features)
 			style_loss = style_loss_weight * layered_mean_squared_error(style_feature_grams, stylized_style_feature_grams)
-			loss = content_loss + style_loss
+			temporal_loss = tf.constant(0.0)
+			if use_temporal_loss:
+				temporal_loss = temporal_loss_weight * get_temporal_loss(initial_stylized, stylized, weights_mask, flow)
+			loss = content_loss + style_loss + temporal_loss
 			# add temporal loss if applicable
 			# if use_temporal_loss:
 				# TODO: temporal loss
 
 		if e % 100 == 0:
-			print("Epoch " + str(e) + ": Content Loss = " + str(content_loss.numpy()) + " Style Loss = " + str(style_loss.numpy()))
+			print("Epoch " + str(e) + ": Content Loss = " + str(content_loss.numpy()) + " Style Loss = " + str(style_loss.numpy()), " Temporal Loss = " + str(temporal_loss.numpy()))
 		# calculate gradient of loss with respect to the stylized image (a variable)
 		grad = tape.gradient(loss, stylized)
 		# Applies this gradient to the image
@@ -256,7 +295,10 @@ def get_temporal_loss(previous_stylized, current_stylized, weights_mask, flow):
 	
 	# TODO: implement temporal loss between 
 
+	# print(flow)
 	warped_style_curr = apply_optical_flow(flow, previous_stylized)
+	# print(warped_style_curr-current_stylized, "warped-stylized")
+	# print(current_stylized, "curr_stylized")
 
 	loss = tf.where(weights_mask, (current_stylized-warped_style_curr)**2, 0)
 
